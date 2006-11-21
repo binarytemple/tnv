@@ -398,14 +398,14 @@ public class TNV extends JFrame {
 		this.aboutMenuItem = new JMenuItem( "About" );
 		this.aboutMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( ActionEvent e ) {
-				String text = "TNV: Time-based Network traffic Visualization\n"
-						+ "Version: " + VERSION + "\n"
-						+ "Build date: " + BUILD_DATE + "\n"
+				String text = "tnv:  http://tnv.sourceforge.net/\n"
+						+ "    Version:  " + VERSION + "\n"
+						+ "    Build date:  " + BUILD_DATE + "\n"
+						+ " \n"
 						+ "(c) 2006, John Goodall. Some rights reserved.\n"
+						+ " \n"
 						+ "Released under the GNU General Public License (GPL)\n"
-						+ "http://creativecommons.org/licenses/GPL/2.0/\n"
-						+ "http://www.umbc.edu/~jgood/tnv/ \n"
-						+ "Send feedback and bugs to John Goodall: jgood@umbc.edu \n\n";
+						+ "    http://creativecommons.org/licenses/GPL/2.0/";
 				java.net.URL imgURL = TNV.class.getResource( "images/tnv_thumb.gif" );
 				if ( imgURL != null ) {
 					ImageIcon tnvIcon = new ImageIcon( imgURL );
