@@ -15,9 +15,9 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -43,7 +43,7 @@ import net.sourceforge.jpcap.capture.PacketCapture;
  */
 public class TNVCaptureDialog extends JDialog {
 
-	private JLabel deviceLabel;
+	private JLabel deviceDesc;
 	private SpinnerNumberModel limitPacketSizeModel;
 	private JSpinner limitPacketSizeSpinner;
 	private SpinnerNumberModel stopByPacketsModel;
@@ -51,8 +51,7 @@ public class TNVCaptureDialog extends JDialog {
 	private SpinnerNumberModel stopByTimeModel;
 	private JButton cancelButton, startButton;
 
-	private Object[] deviceList;
-	private Object[] deviceDescriptions;
+	private Map<String,String> devices = new HashMap<String,String>();
 	private String device;
 
 	private boolean promiscuousMode = true;
@@ -69,6 +68,7 @@ public class TNVCaptureDialog extends JDialog {
 	 * @throws java.awt.HeadlessException
 	 */
 	private TNVCaptureDialog(TNV p) throws HeadlessException {
+		super(p, "Capture Packets");
 		this.parent = p;
 
 		JPanel framePanel = new JPanel();
@@ -83,72 +83,78 @@ public class TNVCaptureDialog extends JDialog {
 		capturePanel.setLayout( new BoxLayout( capturePanel, BoxLayout.Y_AXIS ) );
 
 		// Get device list
-
+				
 		// for a Mac, workaround to use Java instead of jpcap
 		if ( System.getProperty("os.name").toLowerCase().startsWith("mac") ) {
-			List<String> jDevsList = new ArrayList<String>();
-			List<String> jDescrList = new ArrayList<String>();
 			try {
 				Enumeration e = NetworkInterface.getNetworkInterfaces();
 				while ( e.hasMoreElements() ) {
 					String device = ( (NetworkInterface)e.nextElement() ).getName();
-					jDevsList.add( device );
 					NetworkInterface nic = NetworkInterface.getByName( device );
 					String description = nic.getDisplayName() + ": ";
 					Enumeration descEn = nic.getInetAddresses();
-					while ( descEn.hasMoreElements() ) {
+					while ( descEn.hasMoreElements() )
 						description += ((InetAddress) descEn.nextElement()).getHostAddress() + "  ";
-					}
-					jDescrList.add(description);
+					devices.put(device, description);
 				}
 			}
-			catch ( Exception e ) { }
-			this.deviceList = jDevsList.toArray();
-			this.deviceDescriptions = jDescrList.toArray();
+			catch ( Exception ex ) {
+				TNVErrorDialog.createTNVErrorDialog(this.getClass(), "Error getting devices", ex);
+			}
 		}
 		else {
 			try {
 				 String[] devs = PacketCapture.lookupDevices();
-				 this.deviceList = new Object[devs.length];
-				 this.deviceDescriptions = new Object[devs.length];
 				 for ( int i = 0 ; i < devs.length ; i++ ) {
 					 int lineBreakIndex = devs[i].indexOf('\n'); 
 					 String deviceName = devs[i].substring(0,lineBreakIndex);
-					 String description = devs[i].substring(lineBreakIndex+1);
+					 String deviceDescription = devs[i].substring(lineBreakIndex+1);
+					 String device = "";
+					 String description = "";
+						 
 					 if ( deviceName != null && deviceName.length() > 0 )
-						 this.deviceList[i] = deviceName;
+						 device = deviceName;
 					 else
-						 this.deviceList[i] = devs[i];
-					 if ( description != null && description.length() > 0 ) 
-						 deviceDescriptions[i] = description;
+						 device = devs[i];
+					 if ( deviceDescription != null && deviceDescription.length() > 0 ) 
+						 description = deviceDescription;
 					 else
-						 deviceDescriptions[i] = "";
+						 description = "";
+					 devices.put(device, description);
 				 }
 			}
-			catch (Exception ex) { }
+			catch (Exception ex) {
+				TNVErrorDialog.createTNVErrorDialog(this.getClass(), "Error getting devices", ex);
+			}
 		}
 						
-		if ( this.deviceList == null || this.deviceList.length == 0 ) {
-			JOptionPane.showMessageDialog( TNVCaptureDialog.this, "Could not find any devices", "Device Error",
-					JOptionPane.WARNING_MESSAGE );
+		if ( this.devices.isEmpty() ) {
+			JOptionPane.showMessageDialog( TNVCaptureDialog.this, "Could not find any devices" ,
+					"Device Error", JOptionPane.WARNING_MESSAGE );
 			this.parent.setupCapture( false, "", false, 0, 0 );
 			return;
 		}
 
 		// Create GUI
 		JPanel devicePanel = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
-		JComboBox devicePopup = new JComboBox( this.deviceList );
+		JLabel devicePopupLabel = new JLabel("Device:      ");
+		JComboBox devicePopup = new JComboBox( this.devices.keySet().toArray() );
 		devicePopup.addActionListener( new ActionListener() {
 			public void actionPerformed( ActionEvent e ) {
 				TNVCaptureDialog.this.device = ( (JComboBox) e.getSource() ).getSelectedItem().toString();
-				setDeviceLabel( TNVCaptureDialog.this.device );
+				TNVCaptureDialog.this.deviceDesc.setText(
+						TNVCaptureDialog.this.devices.get(TNVCaptureDialog.this.device) );
 			}
 		} );
+		devicePopupLabel.setLabelFor(devicePopup);
 		this.device = devicePopup.getSelectedItem().toString();
-		this.deviceLabel = new JLabel();
-		setDeviceLabel( this.device );
+		devicePanel.add( devicePopupLabel );
 		devicePanel.add( devicePopup );
-		devicePanel.add( this.deviceLabel );
+		
+		JPanel deviceLabelPanel = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
+		this.deviceDesc = new JLabel();
+		this.deviceDesc.setText(this.devices.get(this.device));
+		deviceLabelPanel.add( this.deviceDesc );
 
 		JPanel promiscPanel = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
 		JCheckBox promiscBox = new JCheckBox( "Capture packets in promiscuous mode" );
@@ -186,6 +192,7 @@ public class TNVCaptureDialog extends JDialog {
 		limitPanel.add( this.limitPacketSizeSpinner );
 
 		capturePanel.add( devicePanel );
+		capturePanel.add( deviceLabelPanel );
 		capturePanel.add( promiscPanel );
 		capturePanel.add( limitPanel );
 		framePanel.add( capturePanel );
@@ -255,23 +262,11 @@ public class TNVCaptureDialog extends JDialog {
 
 		this.pack();
 		this.getRootPane().setDefaultButton( this.startButton );
-		this.setLocationRelativeTo( this.parent );
+		this.setLocationRelativeTo(this.parent);
 		this.setVisible( true );
 
 	}
 
-
-	/**
-	 * @param dev
-	 */
-	private void setDeviceLabel(String dev) {
-		String descr = "";
-		for ( int i = 0 ; i < this.deviceList.length ; i++ ) {
-			if ( this.deviceList[i].equals(dev) )
-				descr = this.deviceDescriptions[i].toString();
-		}
-		this.deviceLabel.setText( descr );
-	}
 
 	/**
 	 * Factory constructor
