@@ -43,9 +43,20 @@ import net.sourceforge.jpcap.util.TcpdumpWriter;
  */
 public class TNV extends JFrame {
 
-	private static final String BUILD_DATE = "November 19, 2006";
-	private static final String VERSION = "0.3.2";
+	private static final String BUILD_DATE = "December 14, 2006";
+	private static final String VERSION = "0.3.4";
 	
+	private static final String ABOUT_TEXT = 
+		  "tnv:  http://tnv.sourceforge.net/\n"
+		+ "    Version:  " + VERSION + "\n"
+		+ "    Build date:  " + BUILD_DATE + "\n"
+		+ " \n"
+		+ "(c) 2006, John Goodall. Some rights reserved.\n"
+		+ " \n"
+		+ "Released under the GNU General Public License (GPL)\n"
+		+ "    http://creativecommons.org/licenses/GPL/2.0/";
+	private static final java.net.URL ABOUT_IMG_URL = TNV.class.getResource( "images/tnv_thumb.gif" );
+
 	private static final Cursor defaultCursor = new Cursor( Cursor.DEFAULT_CURSOR );
 	private static final Cursor crosshairCursor = new Cursor( Cursor.CROSSHAIR_CURSOR );
 	private static final Cursor waitCursor = new Cursor( Cursor.WAIT_CURSOR );
@@ -136,19 +147,8 @@ public class TNV extends JFrame {
 	 */
 	private void initComponents( ) {
 
-
-		// check if the home network is defined already in the preferences
-		// or open up a dialog box prompting for it
-		String homeNet = TNVPreferenceData.getInstance().getHomeNet();
-		if ( homeNet == null || homeNet.equalsIgnoreCase("") ) {
-			// if home net is not defined, first open up quickstart window
-			TNVQuickStartDialog.createTNVQuickStartDialog();
-			
-			TNVHomeNetDialog.createTNVHomeNetDialog();
-		}
-			
-		// choose a type of DB connection before showing frame
-		TNVDbTypeChooserDialog.createTNVDbTypeChooserDialog();
+		// splash screen first
+		TNVSplashWindow.createTNVSplashWindow(ABOUT_TEXT, ABOUT_IMG_URL, this, 2250);
 		
 		// override window closing to clean up before quitting
 		this.addWindowListener( new WindowAdapter() {
@@ -158,9 +158,6 @@ public class TNV extends JFrame {
 			}
 		} );
 		
-		// create all menus
-		this.createMenus();
-
 		// Minimum window resizing
 		this.addComponentListener( new ComponentAdapter() {
 			@Override
@@ -184,7 +181,23 @@ public class TNV extends JFrame {
 
 		// Add main UI to panel
 		this.vui = new TNVUIManager();
+
+		// check if the home network is defined already in the preferences
+		// or open up a dialog box prompting for it
+		String homeNet = TNVPreferenceData.getInstance().getHomeNet();
+		if ( homeNet == null || homeNet.equalsIgnoreCase("") ) {
+			// if home net is not defined, first open up quickstart window
+			TNVQuickStartDialog.createTNVQuickStartDialog();
+			
+			TNVHomeNetDialog.createTNVHomeNetDialog();
+		}
+			
+		// choose a type of DB connection before showing frame
+		TNVDbTypeChooserDialog.createTNVDbTypeChooserDialog();
 		
+		// create all menus
+		this.createMenus();
+
 		getContentPane().add( this.vui, BorderLayout.CENTER );
 		this.pack();
 
@@ -398,21 +411,12 @@ public class TNV extends JFrame {
 		this.aboutMenuItem = new JMenuItem( "About" );
 		this.aboutMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( ActionEvent e ) {
-				String text = "tnv:  http://tnv.sourceforge.net/\n"
-						+ "    Version:  " + VERSION + "\n"
-						+ "    Build date:  " + BUILD_DATE + "\n"
-						+ " \n"
-						+ "(c) 2006, John Goodall. Some rights reserved.\n"
-						+ " \n"
-						+ "Released under the GNU General Public License (GPL)\n"
-						+ "    http://creativecommons.org/licenses/GPL/2.0/";
-				java.net.URL imgURL = TNV.class.getResource( "images/tnv_thumb.gif" );
-				if ( imgURL != null ) {
-					ImageIcon tnvIcon = new ImageIcon( imgURL );
-					JOptionPane.showMessageDialog( TNV.this, text, "About", JOptionPane.PLAIN_MESSAGE, tnvIcon );
+				if ( ABOUT_IMG_URL != null ) {
+					ImageIcon tnvIcon = new ImageIcon( ABOUT_IMG_URL );
+					JOptionPane.showMessageDialog( TNV.this, ABOUT_TEXT, "About", JOptionPane.PLAIN_MESSAGE, tnvIcon );
 				}
 				else
-					JOptionPane.showMessageDialog( TNV.this, text, "About", JOptionPane.PLAIN_MESSAGE );
+					JOptionPane.showMessageDialog( TNV.this, ABOUT_TEXT, "About", JOptionPane.PLAIN_MESSAGE );
 			}
 		} );
 
@@ -879,6 +883,14 @@ public class TNV extends JFrame {
 	 * @param args the command line arguments
 	 */
 	public static void main( String args[] ) {
+		
+		// check version - must be 1.5+ 
+		String version = System.getProperty("java.version");
+		if ( version.startsWith("1.2") || version.startsWith("1.3") || version.startsWith("1.4") ) {
+			System.out.println ("\nJava " + version + " is not supported:   tnv requires JRE 1.5 or higher\n\n");
+			System.exit(1);
+		}
+		
 		new TNV();
 	}
 
