@@ -14,8 +14,6 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 
 import net.sourceforge.jpcap.net.IPPort;
-import edu.umd.cs.piccolo.PNode;
-import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolo.nodes.PText;
 
 /**

@@ -108,9 +108,9 @@ public class TNVLinkNode extends PPath {
 
 		// create tooltip, to show when mouse enters this link node
 		if ( direction.equals( LinkDirection.OUTGOING ) )
-			this.tooltipText = this.dst.getDnsName() + " < " + this.src.getDnsName();
+			this.tooltipText = this.dst.getName() + " < " + this.src.getName();
 		else
-			this.tooltipText = this.src.getDnsName() + " > " + this.dst.getDnsName();
+			this.tooltipText = this.src.getName() + " > " + this.dst.getName();
 		this.tooltipText += ": " + this.frequency + " " + this.shortProtocol + "   ";
 		this.tooltip = (PText) TNVUtil.DEFAULT_TOOLTIP_NODE.clone();
 		this.tooltip.setText( this.tooltipText );

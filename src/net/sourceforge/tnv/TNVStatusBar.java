@@ -171,7 +171,7 @@ public class TNVStatusBar extends JPanel
     	this.selectField.setText( "" );
     	for ( TNVLocalHostCell node : selectedNodes )
     		this.selectField.setText( this.selectField.getText() + " " 
-    				+ node.getDnsName() + " (" + node.getFrequency() + ") ");
+    				+ node.getName() + " (" + node.getFrequency() + ") ");
      }
 
     

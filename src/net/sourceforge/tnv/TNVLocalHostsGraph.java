@@ -139,7 +139,7 @@ public class TNVLocalHostsGraph extends PNode {
 			g2.setColor( Color.BLACK );
 			double x = this.getX();
 			double w;
-			double y = this.getY();
+			double y = this.getY() + 1;
 			String dateLabel;
 			int last = this.columnStartTimes.length - 1;
 			for ( int i = 0; i < this.columnWidths.length; i++ ) {

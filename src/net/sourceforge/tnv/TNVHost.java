@@ -65,19 +65,6 @@ public abstract class TNVHost extends PNode {
 	}
 
 	/**
-	 * @return the dnsName
-	 */
-	protected final String getDnsName( ) {
-		try {
-			return this.getIpAddress().getCanonicalHostName();
-		}
-		catch ( Exception e ) {
-		}
-		return this.name;
-	}
-
-
-	/**
 	 * @return the frequency
 	 */
 	protected int getFrequency( ) {

@@ -115,7 +115,6 @@ public class TNVLocalHostCell extends PNode {
 		this.columnIndex = i;
 		
 		this.tooltip = (PText) TNVUtil.DEFAULT_TOOLTIP_NODE.clone();
-		this.tooltip.setText( this.host.getDnsName() );
 		
 		TNVModel.getInstance().addPropertyChangeListener(  new PropertyChangeListener() {
 			public void propertyChange( PropertyChangeEvent evt ) {
@@ -180,7 +179,7 @@ public class TNVLocalHostCell extends PNode {
 					if ( TNVPreferenceData.getInstance().isShowTooltips() ) {
 						event.getCamera().getLayer( TNVCanvas.TOOLTIP_LAYER ).addChild( TNVLocalHostCell.this.tooltip );
 						double y = TNVLocalHostCell.this.getY() - 10;
-						String ttText = " " + TNVLocalHostCell.this.host.getDnsName() + "  ("
+						String ttText = " " + TNVLocalHostCell.this.host.getName() + "  ("
 							+ TNVLocalHostCell.this.frequency + " packets)  ";
 						if ( ! tcpPortSet.isEmpty() ) {
 							ttText += "\n  TCP Ports: " + TNVLocalHostCell.this.getTooltipPorts( 
@@ -628,14 +627,6 @@ public class TNVLocalHostCell extends PNode {
 	 */
 	protected final String getName( ) {
 		return this.host.getName();
-	}
-
-
-	/**
-	 * @return the dnsName
-	 */
-	protected final String getDnsName( ) {
-		return this.host.getDnsName();
 	}
 
 
