@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Class-Path: jars/hsqldb.jar jars/mysql-connector.jar jars/jpcap.jar jars/piccolo.jar
+Main-Class: net.sourceforge.tnv.TNV

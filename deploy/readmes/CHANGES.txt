@@ -1,0 +1,9 @@
+0.3.4 - 12/14/2006
+-Added splash screen
+-Improved capture dialog: nice names under Windows, better error messages
+-Faster startup
+-More readable startup scripts
+
+0.3.3 - 12/13/2006
+-Removed attempt to get DNS name - cause of Windows performance issues
+-Updated MySQL connector lib to version 5
