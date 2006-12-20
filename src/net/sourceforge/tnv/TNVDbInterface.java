@@ -20,7 +20,7 @@ import net.sourceforge.jpcap.net.RawPacket;
 /**
  * TNVDb
  */
-public interface TNVDb {
+public interface TNVDbInterface {
 
 	/**
 	 * Load the Database Engine JDBC driver and opens connection to a database

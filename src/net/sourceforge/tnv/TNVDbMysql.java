@@ -16,14 +16,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 
 import net.sourceforge.jpcap.net.IPPacket;
 import net.sourceforge.jpcap.net.LinkLayers;
@@ -37,7 +30,7 @@ import net.sourceforge.jpcap.util.TcpdumpWriter;
 /**
  * TNVDbMysql
  */
-public class TNVDbMysql implements TNVDb {
+public class TNVDbMysql extends TNVDbAbstract implements TNVDbInterface {
 
 	private static String PACKET_TABLE = "packet_table";
 
@@ -46,16 +39,11 @@ public class TNVDbMysql implements TNVDb {
 	
 	// Min and Max times to use for visualization
 	private Timestamp minTime, maxTime;
-	
-	// Map of local hosts' packets - hostname: map (timestamp: list (packets))
-	private Map<String, SortedMap<Timestamp, List<TNVPacket>>> localHostMap = 
-		new HashMap<String, SortedMap<Timestamp, List<TNVPacket>>>();
-
-	// Set of remote hosts
-	private Set<String> remoteHostList = new HashSet<String>();
-	
+		
+	// JDBC Connection
 	private Connection conn = null;
 
+	// JDBC prepared statements
 	private PreparedStatement 
 			insertPacketStmt, 					// insert packet into db
 			selectDistinctHostsStmt, 			// get distinct hosts
@@ -72,7 +60,7 @@ public class TNVDbMysql implements TNVDb {
 			selectPacketListStmt;				// get packet details (for detail window)
 
 	// Singleton instance
-	private static TNVDb instance = new TNVDbMysql();
+	private static TNVDbInterface instance = new TNVDbMysql();
 
 
 	/**
@@ -85,7 +73,7 @@ public class TNVDbMysql implements TNVDb {
 	 * Singleton
 	 * @return this
 	 */
-	public static TNVDb getInstance( ) {
+	public static TNVDbInterface getInstance( ) {
 		return instance;
 	}
 
@@ -138,8 +126,7 @@ public class TNVDbMysql implements TNVDb {
 		this.selectInPortsStmt = null;
 		this.selectOutPortsStmt = null;
 
-		this.localHostMap.clear();
-		this.remoteHostList.clear();
+		this.clearHosts();
 		
 		this.minTime = null;
 		this.maxTime = null;
@@ -214,10 +201,8 @@ public class TNVDbMysql implements TNVDb {
 		this.insertPacketStmt.setObject( 9, packet );
 		this.insertPacketStmt.executeUpdate();
 		
-		if ( ! this.localHostMap.containsKey(src) && ! this.remoteHostList.contains(src) )
-			this.addHost(src);
-		if ( ! this.localHostMap.containsKey(dst) && ! this.remoteHostList.contains(dst) )
-			this.addHost(dst);
+		this.addHost(src);
+		this.addHost(dst);
 		this.addPacket(packet);
 
 	}
@@ -577,31 +562,7 @@ public class TNVDbMysql implements TNVDb {
 		return count;
 	}
 
-	
-	/**
-	 * @return the localHostMap
-	 */
-	public final Map<String, SortedMap<Timestamp, List<TNVPacket>>> getLocalHostMap( ) {
-		return this.localHostMap;
-	}
-
-	/**
-	 * @return the localHostMap
-	 * @param the host to get the map for
-	 */
-	public final SortedMap<Timestamp, List<TNVPacket>> getLocalHostMap( String host ) {
-		return this.localHostMap.get( host );
-	}
-
-
-	/**
-	 * @return Returns all remote hosts.
-	 */
-	public final Set<String> getRemoteHostList( ) {
-		return this.remoteHostList;
-	}
-
-	
+		
 	/**
 	 * @return the getLinksStatement
 	 */
@@ -746,17 +707,6 @@ public class TNVDbMysql implements TNVDb {
 		st.close();
 	}
 	
-	/**
-	 * inserts a host into the local or remote set
-	 * @param name the String name to add to lists
-	 */
-	private void addHost( String name ) {
-		if ( TNVUtil.isOnHomeNet( name, TNVPreferenceData.getInstance().getHomeNet() ) )
-			this.localHostMap.put( name, new TreeMap<Timestamp, List<TNVPacket>>() );
-		else
-			this.remoteHostList.add( name );
-	}
-
 	
 	/**
 	 * inserts a packet into local host map
@@ -791,20 +741,20 @@ public class TNVDbMysql implements TNVDb {
 			
 			List<TNVPacket> l;
 			if ( TNVUtil.isOnHomeNet( srcAddr, TNVPreferenceData.getInstance().getHomeNet() ) ) {
-				if ( this.localHostMap.get( srcAddr ).containsKey( time ) )
-					l = this.localHostMap.get( srcAddr ).get( time );
+				if ( this.getLocalHostMap().get( srcAddr ).containsKey( time ) )
+					l = this.getLocalHostMap().get( srcAddr ).get( time );
 				else
 					l = new ArrayList<TNVPacket>();
 				l.add( tnvpacket );
-				this.localHostMap.get( srcAddr ).put( time, l );
+				this.getLocalHostMap().get( srcAddr ).put( time, l );
 			}
 			if ( TNVUtil.isOnHomeNet( dstAddr, TNVPreferenceData.getInstance().getHomeNet() ) ) {
-				if ( this.localHostMap.get( dstAddr ).containsKey( time ) )
-					l = this.localHostMap.get( dstAddr ).get( time );
+				if ( this.getLocalHostMap().get( dstAddr ).containsKey( time ) )
+					l = this.getLocalHostMap().get( dstAddr ).get( time );
 				else
 					l = new ArrayList<TNVPacket>();
 				l.add( tnvpacket );			
-				this.localHostMap.get( dstAddr ).put( time, l );
+				this.getLocalHostMap().get( dstAddr ).put( time, l );
 			}
 
 		}

@@ -28,7 +28,7 @@ public class TNVDbUtil {
 	/**
 	 * The current instance to use 
 	 */
-	private static TNVDb instance;
+	private static TNVDbInterface instance;
 	
 	
 	/**
@@ -36,7 +36,7 @@ public class TNVDbUtil {
 	 * @param type
 	 * @return
 	 */
-	protected static TNVDb createDBinstance(DB_TYPE type) {
+	protected static TNVDbInterface createDBinstance(DB_TYPE type) {
 		// if there already is an instance, remove it
 		if ( instance != null ) {
 			try {
@@ -63,7 +63,7 @@ public class TNVDbUtil {
 	 * Return the current DB instance
 	 * @return instance
 	 */
-	protected static TNVDb getInstance() {
+	protected static TNVDbInterface getInstance() {
 		// default is embedded
 		if ( instance == null )
 			TNVErrorDialog.createTNVErrorDialog(instance.getClass(), "Database has not been created.");
