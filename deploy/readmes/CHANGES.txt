@@ -1,3 +1,6 @@
+0.3.5 - 12/22/2006
+-Added host sort functions based on arrival time or IP
+
 0.3.4 - 12/14/2006
 -Added splash screen
 -Improved capture dialog: nice names under Windows, better error messages
