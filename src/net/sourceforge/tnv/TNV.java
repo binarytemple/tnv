@@ -43,8 +43,8 @@ import net.sourceforge.jpcap.util.TcpdumpWriter;
  */
 public class TNV extends JFrame {
 
-	private static final String BUILD_DATE = "December 14, 2006";
-	private static final String VERSION = "0.3.4";
+	private static final String BUILD_DATE = "December 22, 2006";
+	private static final String VERSION = "0.3.5";
 	
 	private static final String ABOUT_TEXT = 
 		  "tnv:  http://tnv.sourceforge.net/\n"
