@@ -27,9 +27,16 @@ public class TNVPreferenceData {
 
 	private EventListenerList listenerList = new EventListenerList();
 
+	protected final static int SORT_ARRIVAL = 0;
+	protected final static int SORT_ARRIVAL_REVERSE = 1;
+	protected final static int SORT_ALPHA = 2;
+	protected final static int SORT_ALPHA_REVERSE = 3;
+	
 	private final static String PROPERTIES_FILE = "tnv.properties";
 
 	// Default Settings
+	private final static int DEFAULT_LOCAL_SORT = SORT_ARRIVAL;
+	private final static int DEFAULT_REMOTE_SORT = SORT_ARRIVAL;
 	private final static int DEFAULT_COLUMN_COUNT = 5;
 	private final static int DEFAULT_ROW_HEIGHT = 75;
 	private final static boolean DEFAULT_SHOW_TOOLTIPS = true;
@@ -51,6 +58,7 @@ public class TNVPreferenceData {
 	private final static int DEFAULT_COLOR_MAP_INDEX = 0;
 
 	// Preferences
+	private int localSort, remoteSort;
 	private int columnCount, rowHeight;
 	private boolean showTooltips, showPackets, showFlags, curvedLinks;
 	private String homeNet;
@@ -93,6 +101,8 @@ public class TNVPreferenceData {
 			System.out.println( "Could not load preference file: " + e.getMessage() );
 		}
 		setHomeNet( getStringProperty( "HomeNet", "" ) );
+		setLocalSort( getIntProperty( "LocalSort", DEFAULT_LOCAL_SORT ) );
+		setRemoteSort( getIntProperty( "RemoteSort", DEFAULT_REMOTE_SORT ) );
 		setColumnCount( getIntProperty( "ColumnCount", DEFAULT_COLUMN_COUNT ) );
 		setRowHeight( getIntProperty( "RowHeight", DEFAULT_ROW_HEIGHT ) );
 		setCurvedLinks( getBooleanProperty( "CurvedLinks", DEFAULT_CURVED_LINKS ) );
@@ -117,6 +127,10 @@ public class TNVPreferenceData {
 	 */
 	protected void saveProperties( ) {
 		this.properties.setProperty( "HomeNet", getHomeNet() );
+		
+		this.properties.setProperty( "LocalSort", getLocalSort() + "");
+		this.properties.setProperty( "RemoteSort", getRemoteSort() + "");
+		
 		this.properties.setProperty( "ColumnCount", getColumnCount() + "" );
 		this.properties.setProperty( "RowHeight", getRowHeight() + "" );
 
@@ -182,6 +196,8 @@ public class TNVPreferenceData {
 	 */
 /*	protected void resetProperties( ) {
 		setHomeNet( "" );
+		setLocalSort( DEFAULT_LOCAL_SORT );
+		setRemoteSort( DEFAULT_REMOTE_SORT );
 		setColumnCount( DEFAULT_COLUMN_COUNT );
 		setRowHeight( DEFAULT_ROW_HEIGHT );
 		setCurvedLinks( DEFAULT_CURVED_LINKS);
@@ -194,6 +210,36 @@ public class TNVPreferenceData {
 		setColorMapIndex( DEFAULT_COLOR_MAP_INDEX );
 	}
 */
+
+	/**
+	 * @return Returns the localSort.
+	 */
+	protected final int getLocalSort( ) {
+		return this.localSort;
+	}
+
+	/**
+	 * @param localSort The localSort to set.
+	 */
+	protected final void setLocalSort( int o ) {
+		this.localSort = o;
+		this.firePreferenceChanged();
+	}
+
+	/**
+	 * @return Returns the remoteSort.
+	 */
+	protected final int getRemoteSort( ) {
+		return this.remoteSort;
+	}
+
+	/**
+	 * @param remoteSort The remoteSort to set.
+	 */
+	protected final void setRemoteSort( int o ) {
+		this.remoteSort = o;
+		this.firePreferenceChanged();
+	}
 
 	/**
 	 * @return Returns the columnWidth.

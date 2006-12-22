@@ -12,8 +12,11 @@ import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.Timestamp;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -40,6 +43,8 @@ public class TNVLocalHostsGraph extends PNode {
 	// parent canvas
 	private TNVCanvas canvas;
 
+	private int sortOrder;
+	
 	// number of rows/cols expanded
 	private int colsExpanded = 0;
 	private int rowsExpanded = 0;
@@ -66,6 +71,8 @@ public class TNVLocalHostsGraph extends PNode {
 		this.canvas = c;
 		this.setPickable( false );
 
+		this.sortOrder = TNVPreferenceData.getInstance().getLocalSort();
+		
 		// Listen for changes in start and end time selections
 		String[] listenProps = { TNVModel.PROPERTY_VISIBLE_START_TIME, TNVModel.PROPERTY_VISIBLE_END_TIME };
 		TNVModel.getInstance().addPropertyChangeListener( listenProps, new PropertyChangeListener() {
@@ -118,6 +125,11 @@ public class TNVLocalHostsGraph extends PNode {
 				}
 				if ( defaultRowHeight != TNVPreferenceData.getInstance().getRowHeight() )
 					TNVLocalHostsGraph.this.layoutChildren();
+				if ( TNVPreferenceData.getInstance().getLocalSort() != TNVLocalHostsGraph.this.sortOrder ) {
+					TNVLocalHostsGraph.this.sortOrder = TNVPreferenceData.getInstance().getLocalSort();
+					TNVLocalHostsGraph.this.sortHosts();
+					TNVLocalHostsGraph.this.layoutChildren();
+				}
 			}
 		} );
 
@@ -205,6 +217,7 @@ public class TNVLocalHostsGraph extends PNode {
 			for ( int i = 0; i < numberOfColumns; i++ )
 				h.addChild( new TNVLocalHostCell( h, this.canvas, i ) );
 		}
+		this.sortHosts();
 		this.layoutChildren();
 	}
 
@@ -503,6 +516,44 @@ public class TNVLocalHostsGraph extends PNode {
 	}
 
 
+	/**
+	 * Sort hosts 
+	 */
+	private void sortHosts() {
+		List<TNVHost> hosts = this.getChildrenReference();
+		
+		if ( this.sortOrder == TNVPreferenceData.SORT_ARRIVAL ) {
+			Collections.sort(hosts, new Comparator<TNVHost>() {
+				public int compare(TNVHost s1, TNVHost s2) {
+					List arrivalList = TNVDbUtil.getInstance().getLocalHostArrivalList();
+					if ( arrivalList.indexOf(s1.getName()) > arrivalList.indexOf(s2.getName()) )
+						return 1;
+					return -1;
+				}
+			});
+		}
+		else if ( this.sortOrder == TNVPreferenceData.SORT_ARRIVAL_REVERSE ) {
+			Collections.sort(hosts, new Comparator<TNVHost>() {
+				public int compare(TNVHost s1, TNVHost s2) {
+					List arrivalList = TNVDbUtil.getInstance().getLocalHostArrivalList();
+					if ( arrivalList.indexOf(s1.getName()) < arrivalList.indexOf(s2.getName()) )
+						return 1;
+					return -1;
+				}
+			});
+		} 
+		else if ( this.sortOrder == TNVPreferenceData.SORT_ALPHA ) {
+			Collections.sort(hosts, TNVUtil.ALPHA_HOST_COMPARATOR);
+		} 
+		else if ( this.sortOrder == TNVPreferenceData.SORT_ALPHA_REVERSE ) {
+			Collections.sort(hosts, TNVUtil.ALPHA_HOST_COMPARATOR);
+			Collections.reverse(hosts);
+		} 
+		
+
+	}
+
+	
 	/**
 	 *
 	 * @return the long[] TNVLocalHostsGraph.java

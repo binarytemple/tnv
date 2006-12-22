@@ -21,6 +21,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -43,6 +44,9 @@ public class TNVDisplayPanel extends JPanel {
 
 	// Home network
 	private TNVHomeNetPanel homeNetPanel;
+	
+	// Sort order combo boxes
+	private JComboBox localHostSortCombo, remoteHostSortCombo;
 	
 	// Column and Row preferences
 	private JSlider rowHeightSlider, columnCountSlider;
@@ -103,6 +107,72 @@ public class TNVDisplayPanel extends JPanel {
 		netPanel.add(homeNetLabelPanel, BorderLayout.SOUTH);
 		outNetPanel.add(netPanel);
 		
+		/*
+		 * Sort order for hosts
+		 */
+		
+		JPanel outLocalSortPanel = new JPanel();
+		outLocalSortPanel.setLayout( new BoxLayout( outLocalSortPanel, BoxLayout.Y_AXIS ) );
+
+		JPanel localSortPanel = new JPanel( new BorderLayout() );
+		localSortPanel.setBorder( BorderFactory.createTitledBorder( BorderFactory
+				.createEtchedBorder( EtchedBorder.RAISED ), "Local host sort order" ) );
+		localSortPanel.setMinimumSize( new Dimension( 200,60 ) );
+		localSortPanel.setPreferredSize( new Dimension( 200,60 ) );
+		localSortPanel.setMaximumSize( new Dimension( 250,60 ) );
+
+		String[] sortOptions = { "Arrival order", "Reverse arrival order", "Ascending", "Decending" };
+		this.localHostSortCombo = new JComboBox( sortOptions );
+		this.localHostSortCombo.setToolTipText("Use to adjust sort order for local hosts");
+		this.localHostSortCombo.setSelectedIndex( TNVPreferenceData.getInstance().getLocalSort() );
+		this.localHostSortCombo.addActionListener( new ActionListener() {
+			public void actionPerformed( ActionEvent e ) {
+				int index = ( (JComboBox) e.getSource() ).getSelectedIndex();
+				if ( index == 0 )
+					TNVPreferenceData.getInstance().setLocalSort(TNVPreferenceData.SORT_ARRIVAL);
+				else if ( index == 1 )
+					TNVPreferenceData.getInstance().setLocalSort(TNVPreferenceData.SORT_ARRIVAL_REVERSE);
+				else if ( index == 2 )
+					TNVPreferenceData.getInstance().setLocalSort(TNVPreferenceData.SORT_ALPHA);
+				else
+					TNVPreferenceData.getInstance().setLocalSort(TNVPreferenceData.SORT_ALPHA_REVERSE);
+				TNVPreferenceData.getInstance().saveProperties();
+			}
+		} );
+		localSortPanel.add( this.localHostSortCombo );
+		outLocalSortPanel.add(localSortPanel, BorderLayout.CENTER);
+		
+		
+		JPanel outRemoteSortPanel = new JPanel();
+		outRemoteSortPanel.setLayout( new BoxLayout( outRemoteSortPanel, BoxLayout.Y_AXIS ) );
+
+		JPanel remoteSortPanel = new JPanel( new BorderLayout() );
+		remoteSortPanel.setBorder( BorderFactory.createTitledBorder( BorderFactory
+				.createEtchedBorder( EtchedBorder.RAISED ), "Remote host sort order" ) );
+		remoteSortPanel.setMinimumSize( new Dimension( 200,60 ) );
+		remoteSortPanel.setPreferredSize( new Dimension( 200,60 ) );
+		remoteSortPanel.setMaximumSize( new Dimension( 250,60 ) );
+
+		this.remoteHostSortCombo = new JComboBox( sortOptions );
+		this.remoteHostSortCombo.setToolTipText("Use to adjust sort order for remote hosts");
+		this.remoteHostSortCombo.setSelectedIndex( TNVPreferenceData.getInstance().getRemoteSort() );
+		this.remoteHostSortCombo.addActionListener( new ActionListener() {
+			public void actionPerformed( ActionEvent e ) {
+				int index = ( (JComboBox) e.getSource() ).getSelectedIndex();
+				if ( index == 0 )
+					TNVPreferenceData.getInstance().setRemoteSort(TNVPreferenceData.SORT_ARRIVAL);
+				else if ( index == 1 )
+					TNVPreferenceData.getInstance().setRemoteSort(TNVPreferenceData.SORT_ARRIVAL_REVERSE);
+				else if ( index == 2 )
+					TNVPreferenceData.getInstance().setRemoteSort(TNVPreferenceData.SORT_ALPHA);
+				else
+					TNVPreferenceData.getInstance().setRemoteSort(TNVPreferenceData.SORT_ALPHA_REVERSE);
+				TNVPreferenceData.getInstance().saveProperties();
+			}
+		} );
+		remoteSortPanel.add( this.remoteHostSortCombo );
+		outRemoteSortPanel.add(remoteSortPanel, BorderLayout.CENTER);
+
 		
 		/*
 		 * Number of columns
@@ -338,6 +408,10 @@ public class TNVDisplayPanel extends JPanel {
 		controls.setLayout( new BoxLayout( controls, BoxLayout.Y_AXIS ) );
 		controls.add( Box.createVerticalStrut(5) );
 		controls.add( outNetPanel );
+		controls.add( Box.createVerticalStrut(10) );
+		controls.add( outLocalSortPanel );
+		controls.add( Box.createVerticalStrut(10) );
+		controls.add( outRemoteSortPanel );
 		controls.add( Box.createVerticalStrut(10) );
 		controls.add( outColumnPanel );
 		controls.add( Box.createVerticalStrut(10) );

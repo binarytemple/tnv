@@ -10,7 +10,14 @@ import java.awt.Color;
 import java.awt.FontMetrics;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
+
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.nodes.PText;
@@ -23,6 +30,7 @@ public class TNVRemoteHostsGraph extends PNode {
 	private static int MAX_HEIGHT = 25;
 	private static int MIN_HEIGHT = 8;
 
+	private int sortOrder;
 	private double defaultRowHeight;
 	
 	// parent canvas
@@ -37,7 +45,9 @@ public class TNVRemoteHostsGraph extends PNode {
 		super();
 		this.canvas = c;
 		this.setPickable( false );
-
+		
+		this.sortOrder = TNVPreferenceData.getInstance().getRemoteSort();
+		
 		// Listen for changes in start and end time selections
 		String[] listenProps = { TNVModel.PROPERTY_VISIBLE_START_TIME, TNVModel.PROPERTY_VISIBLE_END_TIME };
 		TNVModel.getInstance().addPropertyChangeListener( listenProps, new PropertyChangeListener() {
@@ -64,6 +74,17 @@ public class TNVRemoteHostsGraph extends PNode {
 		// listen for dragging events to reorder the rows
 		this.addInputEventListener( new TNVHostDragEventHandler(this)  );
 
+		// listen for preference changes
+		TNVPreferenceData.getInstance().addPreferenceChangeListener( new ChangeListener() {
+			public void stateChanged( ChangeEvent evt ) {
+				if ( TNVPreferenceData.getInstance().getRemoteSort() != TNVRemoteHostsGraph.this.sortOrder ) {
+					TNVRemoteHostsGraph.this.sortOrder = TNVPreferenceData.getInstance().getRemoteSort();
+					TNVRemoteHostsGraph.this.sortHosts();
+					TNVRemoteHostsGraph.this.layoutChildren();
+				}
+			}
+		});
+		
 	}
 
 
@@ -75,13 +96,15 @@ public class TNVRemoteHostsGraph extends PNode {
 
 
 	/**
-	 * setup all local hosts and all nodes to the graph
+	 * setup all remote hosts and all nodes to the graph
 	 */
 	protected void setupHosts() {
-		Iterator it = TNVDbUtil.getInstance().getRemoteHostList().iterator();
+		List<String> hosts = new ArrayList<String>(TNVDbUtil.getInstance().getRemoteHostList());
+		Iterator<String> it =  hosts.iterator();
 		while ( it.hasNext() )
-			this.addChild( new TNVRemoteHost( (String)it.next() ) );
+			this.addChild( new TNVRemoteHost( it.next() ) );
 		this.setDefaultHeight();
+		this.sortHosts();
 		this.layoutChildren();
 	}
 
@@ -137,5 +160,42 @@ public class TNVRemoteHostsGraph extends PNode {
 			this.defaultRowHeight = MAX_HEIGHT;
 		if ( this.defaultRowHeight < MIN_HEIGHT )
 			this.defaultRowHeight = MIN_HEIGHT;
+	}
+	
+	/**
+	 * Sort hosts 
+	 */
+	private void sortHosts() {
+		List<TNVHost> hosts = this.getChildrenReference();
+		
+		if ( this.sortOrder == TNVPreferenceData.SORT_ARRIVAL ) {
+			Collections.sort(hosts, new Comparator<TNVHost>() {
+				public int compare(TNVHost s1, TNVHost s2) {
+					List arrivalList = TNVDbUtil.getInstance().getRemoteHostArrivalList();
+					if ( arrivalList.indexOf(s1.getName()) > arrivalList.indexOf(s2.getName()) )
+						return 1;
+					return -1;
+				}
+			});
+		}
+		else if ( this.sortOrder == TNVPreferenceData.SORT_ARRIVAL_REVERSE ) {
+			Collections.sort(hosts, new Comparator<TNVHost>() {
+				public int compare(TNVHost s1, TNVHost s2) {
+					List arrivalList = TNVDbUtil.getInstance().getRemoteHostArrivalList();
+					if ( arrivalList.indexOf(s1.getName()) < arrivalList.indexOf(s2.getName()) )
+						return 1;
+					return -1;
+				}
+			});
+		} 
+		else if ( this.sortOrder == TNVPreferenceData.SORT_ALPHA ) {
+			Collections.sort(hosts, TNVUtil.ALPHA_HOST_COMPARATOR);
+		} 
+		else if ( this.sortOrder == TNVPreferenceData.SORT_ALPHA_REVERSE ) {
+			Collections.sort(hosts, TNVUtil.ALPHA_HOST_COMPARATOR);
+			Collections.reverse(hosts);
+		} 
+		
+
 	}
 }

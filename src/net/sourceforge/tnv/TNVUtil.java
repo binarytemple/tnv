@@ -8,7 +8,9 @@ package net.sourceforge.tnv;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.SortedMap;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -42,7 +44,7 @@ public final class TNVUtil {
 
 	protected static final PText DEFAULT_TOOLTIP_NODE;
 	
-	protected static final SortedMap<Integer, SortedMap> colorMaps;
+	protected static final SortedMap<Integer, SortedMap> COLOR_MAPS;
 
 	protected static final int BLUE_COLOR_MAP = 0;
 	protected static final int YELLOW_TO_BLUE_COLOR_MAP = 1;
@@ -60,6 +62,31 @@ public final class TNVUtil {
 	protected static final int BROWN_SMALL_COLOR_MAP = 12;
 	protected static final int GRAY_SMALL_COLOR_MAP = 13;
 
+	protected static final Comparator<TNVHost> ALPHA_HOST_COMPARATOR = new Comparator<TNVHost>() {
+		public int compare(TNVHost s1, TNVHost s2) {
+			try {
+				byte host1[] = s1.getIpAddress().getAddress();
+				byte host2[] = s2.getIpAddress().getAddress();
+				for ( int i = 0; i < host1.length; i++ ) {
+					int int1 = host1[i], int2 = host2[i];
+					if ( host1[i] < 0 ) 
+						int1 += 256;
+					if ( host2[i] < 0 ) 
+						int2 += 256;
+					if ( int1 - int2 > 0 )
+						return 1;
+					else if ( int1 - int2 < 0 )
+						return -1;
+				}
+			} 
+			catch (UnknownHostException e ) {
+				TNVErrorDialog.createTNVErrorDialog(this.getClass(),
+						"Error getting InetAddress for: " + s1 + " / " + s2, e);
+			}
+			return 0;
+		}
+	};
+			
 	static {
 		SortedMap<Integer, SortedMap> maps = new TreeMap<Integer, SortedMap>();
 		// Set up the color map, based on number of packets (500 or 100)
@@ -98,7 +125,7 @@ public final class TNVUtil {
 		maps.put(new Integer(GRAY_SMALL_COLOR_MAP), 
 				createColorMap( 1, 100, new Color( 247, 247, 247 ), new Color( 37, 37, 37 ) ));
 
-		colorMaps = new TreeMap<Integer, SortedMap>(maps);
+		COLOR_MAPS = new TreeMap<Integer, SortedMap>(maps);
 		
 		// create default tooltip node
 		PText tempTooltip = new PText();
@@ -193,7 +220,7 @@ public final class TNVUtil {
 	 * @return color
 	 */
 	protected static final Color getColor( int s, int mapType ) {
-		SortedMap<Integer, Color> colors = colorMaps.get( new Integer(mapType) );
+		SortedMap<Integer, Color> colors = COLOR_MAPS.get( new Integer(mapType) );
 		int size = colors.size();
 		if ( s > size )
 			return colors.get(new Integer(size));
@@ -205,7 +232,7 @@ public final class TNVUtil {
 	 * @return Returns a colorMap.
 	 */
 	protected static final SortedMap<Integer, Color> getColorMap( int mapType ) {
-		return colorMaps.get( new Integer(mapType) );
+		return COLOR_MAPS.get( new Integer(mapType) );
 	}
 
 

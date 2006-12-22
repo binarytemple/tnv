@@ -180,10 +180,22 @@ public interface TNVDbInterface {
 	public abstract SortedMap<Timestamp, List<TNVPacket>> getLocalHostMap(String host);
 
 	/**
+	 *
+	 * @return the List of host arrival order
+	 */
+	public abstract List<String> getLocalHostArrivalList();
+
+	/**
 	 * @return Returns all remote hosts.
 	 */
 	public abstract Set<String> getRemoteHostList();
 
+	/**
+	 *
+	 * @return the List of host arrival order
+	 */
+	public abstract List<String> getRemoteHostArrivalList();
+	
 	/**
 	 * @return the PreparedStatement
 	 */
