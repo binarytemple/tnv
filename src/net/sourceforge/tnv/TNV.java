@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
 
+import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -83,8 +84,7 @@ public class TNV extends JFrame {
 	// UI Components
 	private JMenuItem openMenuItem, saveMenuItem, closeMenuItem, importMenuItem, exportMenuItem, quitMenuItem,
 			prefsMenuItem, resetMenuItem, detailsMenuItem, portsMenuItem,
-			startMenuItem,
-			quickStartMenuItem, helpMenuItem, aboutMenuItem;
+			startMenuItem;
 
 	private TNVUIManager vui;
 
@@ -392,24 +392,72 @@ public class TNV extends JFrame {
 		JMenu helpMenu = new JMenu( "Help" );
 		helpMenu.setMnemonic('H');
 		
-		this.quickStartMenuItem = new JMenuItem( "Quick Start" );
-		this.quickStartMenuItem.addActionListener( new ActionListener() {
+		JMenuItem quickStartMenuItem = new JMenuItem( "Quick Start" );
+		quickStartMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( ActionEvent e ) {
 				TNVQuickStartDialog.createTNVQuickStartDialog();
 			}
 		} );
 
-		this.helpMenuItem = new JMenuItem( "Help" );
-		this.helpMenuItem.setAccelerator( KeyStroke.getKeyStroke( 'H', Toolkit.getDefaultToolkit()
+		JMenuItem helpMenuItem = new JMenuItem( "Help" );
+		helpMenuItem.setAccelerator( KeyStroke.getKeyStroke( 'H', Toolkit.getDefaultToolkit()
 				.getMenuShortcutKeyMask() | java.awt.event.InputEvent.SHIFT_MASK  ) );
-		this.helpMenuItem.addActionListener( new ActionListener() {
+		helpMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( ActionEvent e ) {
 				new TNVHelpWindow();
 			}
 		} );
 
-		this.aboutMenuItem = new JMenuItem( "About" );
-		this.aboutMenuItem.addActionListener( new ActionListener() {
+		JMenuItem forumMenuItem = new JMenuItem( "Help Forums" );
+		forumMenuItem.addActionListener( new ActionListener() {
+			public void actionPerformed( ActionEvent e ) {
+				net.sourceforge.tnv.shared.BareBonesBrowserLaunch.openURL(
+						"http://sourceforge.net/forum/?group_id=182807");
+			}
+		} );
+
+		JMenuItem bugMenuItem = new JMenuItem( "Report Bug" );
+		bugMenuItem.addActionListener( new ActionListener() {
+			public void actionPerformed( ActionEvent e ) {
+				net.sourceforge.tnv.shared.BareBonesBrowserLaunch.openURL(
+						"http://sourceforge.net/tracker/?func=add&group_id=182807&atid=902696");
+			}
+		} );
+
+		JMenuItem featureMenuItem = new JMenuItem( "Request Feature" );
+		featureMenuItem.addActionListener( new ActionListener() {
+			public void actionPerformed( ActionEvent e ) {
+				net.sourceforge.tnv.shared.BareBonesBrowserLaunch.openURL(
+						"http://sourceforge.net/tracker/?func=add&group_id=182807&atid=902699");
+			}
+		} );
+
+		JMenuItem projectMenuItem = new JMenuItem( "Project Home Page" );
+		projectMenuItem.addActionListener( new ActionListener() {
+			public void actionPerformed( ActionEvent e ) {
+				net.sourceforge.tnv.shared.BareBonesBrowserLaunch.openURL(
+						"http://sourceforge.net/projects/tnv/");
+			}
+		} );
+
+		JMenuItem sfMenuItem = new JMenuItem( "SourceForge Home Page" );
+		sfMenuItem.addActionListener( new ActionListener() {
+			public void actionPerformed( ActionEvent e ) {
+				net.sourceforge.tnv.shared.BareBonesBrowserLaunch.openURL(
+						"http://sourceforge.net/");
+			}
+		} );
+
+		JMenu webLinksSubMenu = new JMenu("Web Links");
+		webLinksSubMenu.add( forumMenuItem );
+		webLinksSubMenu.add( bugMenuItem );
+		webLinksSubMenu.add( featureMenuItem );
+		webLinksSubMenu.add( projectMenuItem );
+		webLinksSubMenu.addSeparator();
+		webLinksSubMenu.add( sfMenuItem );
+		
+		JMenuItem aboutMenuItem = new JMenuItem( "About" );
+		aboutMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( ActionEvent e ) {
 				if ( ABOUT_IMG_URL != null ) {
 					ImageIcon tnvIcon = new ImageIcon( ABOUT_IMG_URL );
@@ -420,10 +468,13 @@ public class TNV extends JFrame {
 			}
 		} );
 
-		helpMenu.add( this.quickStartMenuItem );
-		helpMenu.add( this.helpMenuItem );
+		
+		helpMenu.add( quickStartMenuItem );
+		helpMenu.add( helpMenuItem );
 		helpMenu.add( new JSeparator() );
-		helpMenu.add( this.aboutMenuItem );
+		helpMenu.add( webLinksSubMenu );
+		helpMenu.add( new JSeparator() );
+		helpMenu.add( aboutMenuItem );
 
 		// Disable certain menus by default
 		this.saveMenuItem.setEnabled( false );
@@ -437,6 +488,7 @@ public class TNV extends JFrame {
 		mainMenuBar.add( fileMenu );
 		mainMenuBar.add( viewMenu );
 		mainMenuBar.add( captureMenu );
+		mainMenuBar.add(Box.createHorizontalGlue()); // right align help menu
 		mainMenuBar.add( helpMenu );
 
 		setJMenuBar( mainMenuBar );
