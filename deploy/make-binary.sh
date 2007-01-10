@@ -3,13 +3,13 @@
 BASE_DIR=java_binary
 VERSION=`grep "VERSION = "  ../src/net/sourceforge/tnv/TNV.java | cut -d'"' -f2`
 DEST=tnv-$VERSION
+MAC_DEST=mac_universal_binary/tnv-$VERSION/tnv_osx-$VERSION
 
 rm $BASE_DIR/tnv_java_$VERSION.zip
 cd $BASE_DIR
 mkdir -p $DEST
 cp -r ../TNV/* $DEST
-mkdir $DEST/docs
-cp ../readmes/* $DEST/docs
+cp -r ../readmes/* $DEST
 find $DEST -name CVS -type d -exec rm -rf {} \;
 zip -qr tnv_java_$VERSION.zip $DEST
 rm -rf $DEST
@@ -19,8 +19,10 @@ echo "Created tnv_java_$VERSION.zip"
 echo "Uploaded tnv_java_$VERSION.zip to upload.sourceforge.net"
 
 cd ..
-mkdir -p mac_x86_binary/tnv_x86-$VERSION/tnv_osx_x86-$VERSION/docs
-cp readmes/* mac_x86_binary/tnv_x86-$VERSION/tnv_osx_x86-$VERSION/docs
-mkdir -p mac_ppc_binary/tnv_ppc-$VERSION/tnv_osx_ppc-$VERSION/docs
-cp readmes/* mac_ppc_binary/tnv_ppc-$VERSION/tnv_osx_ppc-$VERSION/docs
+mkdir -p $MAC_DEST
+cp -r readmes/* $MAC_DEST
+find $MAC_DEST -name CVS -type d -exec rm -rf {} \;
 echo 'Created mac directories'
+echo 'To create disk image, run:'
+echo '  hdiutil create -srcfolder ./tnv-0.3.6 tnv-0.3.6.dmg '
+echo ''

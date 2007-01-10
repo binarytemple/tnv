@@ -12,3 +12,4 @@ java_binary
 mac_ppc_binary
 mac_x86_binary
 source_code
+mac_universal_binary
