@@ -1,3 +1,12 @@
+0.3.6 - 01/09/2007
+-Changed license to MIT for more flexibility
+-Sort by frequency
+-Added menu links to SF project page, forums, bug, and feature request
+-Refactored to cluster packages together
+-Refactored to have less duplicate code for databases
+-Added remove all data menu item for MySQL
+-Fixed minor bugs with MySQL
+
 0.3.5 - 12/22/2006
 -Added host sort functions based on arrival time or IP
 

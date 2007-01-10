@@ -38,14 +38,32 @@ import javax.swing.SwingUtilities;
 
 import net.sourceforge.jpcap.capture.PacketCapture;
 import net.sourceforge.jpcap.util.TcpdumpWriter;
+import net.sourceforge.tnv.db.TNVDbUtil;
+import net.sourceforge.tnv.dialogs.TNVCaptureDialog;
+import net.sourceforge.tnv.dialogs.TNVDbTypeChooserDialog;
+import net.sourceforge.tnv.dialogs.TNVErrorDialog;
+import net.sourceforge.tnv.dialogs.TNVHomeNetDialog;
+import net.sourceforge.tnv.dialogs.TNVPreferenceDialog;
+import net.sourceforge.tnv.dialogs.TNVQuickStartDialog;
+import net.sourceforge.tnv.dialogs.TNVSplashWindow;
+import net.sourceforge.tnv.dialogs.TNVTimeChooserDialog;
+import net.sourceforge.tnv.ui.TNVDetailWindow;
+import net.sourceforge.tnv.ui.TNVHelpWindow;
+import net.sourceforge.tnv.ui.TNVModel;
+import net.sourceforge.tnv.ui.TNVPacketHandler;
+import net.sourceforge.tnv.ui.TNVPreferenceData;
+import net.sourceforge.tnv.ui.TNVStatusBar;
+import net.sourceforge.tnv.ui.TNVUIManager;
+import net.sourceforge.tnv.util.TNVTcpdumpFileFilter;
+import net.sourceforge.tnv.util.TNVUtil;
 
 /**
  * TNV
  */
 public class TNV extends JFrame {
 
-	private static final String BUILD_DATE = "December 22, 2006";
-	private static final String VERSION = "0.3.5";
+	private static final String BUILD_DATE = "January 9, 2007";
+	private static final String VERSION = "0.3.6";
 	
 	private static final String ABOUT_TEXT = 
 		  "tnv:  http://tnv.sourceforge.net/\n"
@@ -54,8 +72,8 @@ public class TNV extends JFrame {
 		+ " \n"
 		+ "(c) 2006, John Goodall. Some rights reserved.\n"
 		+ " \n"
-		+ "Released under the GNU General Public License (GPL)\n"
-		+ "    http://creativecommons.org/licenses/GPL/2.0/";
+		+ "Released under the MIT License\n"
+		+ "    http://www.opensource.org/licenses/mit-license.php";
 	private static final java.net.URL ABOUT_IMG_URL = TNV.class.getResource( "images/tnv_thumb.gif" );
 
 	private static final Cursor defaultCursor = new Cursor( Cursor.DEFAULT_CURSOR );
@@ -72,8 +90,8 @@ public class TNV extends JFrame {
 	private static final String FILTER = "ip";
 
 	// path to database
-	protected static final String DEFAULT_EMBEDDED_DB_DIR = "db";
-	protected static final String DEFAULT_EMBEDDED_DB_FILE = "tnvdb";
+	public static final String DEFAULT_EMBEDDED_DB_DIR = "db";
+	public static final String DEFAULT_EMBEDDED_DB_FILE = "tnvdb";
 
 	// This and other windows required
 	private static TNV thisFrame;
@@ -82,7 +100,8 @@ public class TNV extends JFrame {
 	private static TNVTcpdumpFileFilter TCPD_FILE_FILTER = new TNVTcpdumpFileFilter();
 
 	// UI Components
-	private JMenuItem openMenuItem, saveMenuItem, closeMenuItem, importMenuItem, exportMenuItem, quitMenuItem,
+	private JMenuItem openMenuItem, saveMenuItem, closeMenuItem, removeDataMenuItem, 
+			importMenuItem, exportMenuItem, quitMenuItem,
 			prefsMenuItem, resetMenuItem, detailsMenuItem, portsMenuItem,
 			startMenuItem;
 
@@ -125,19 +144,19 @@ public class TNV extends JFrame {
 
 
 	/** STATIC * */
-	protected static final void setDefaultCursor( ) {
+	public static final void setDefaultCursor( ) {
 		thisFrame.setCursor( defaultCursor );
 	}
 
-	protected static final void setCrosshairCursor( ) {
+	public static final void setCrosshairCursor( ) {
 		thisFrame.setCursor( crosshairCursor );
 	}
 
-	protected static final void setWaitCursor( ) {
+	public static final void setWaitCursor( ) {
 		thisFrame.setCursor( waitCursor );
 	}
 
-	protected static final void setHandCursor( ) {
+	public static final void setHandCursor( ) {
 		thisFrame.setCursor( handCursor );
 	}
 
@@ -276,6 +295,33 @@ public class TNV extends JFrame {
 			}
 		} );
 
+		if ( ! TNVDbUtil.getType().equals(TNVDbUtil.DB_TYPE.HSQLDB) ) {
+			removeDataMenuItem = new JMenuItem("Remove data from DB");
+			removeDataMenuItem.addActionListener( new ActionListener() {
+				public void actionPerformed( ActionEvent e ) {
+					int ret = JOptionPane.showConfirmDialog( TNV.this, 
+							"Are you sure you want to remove all data from the database? ",
+							"Drop All Data from Database", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE );
+					if ( ret == JOptionPane.NO_OPTION ) 
+						return;
+					TNVUIManager.clearUI();
+					TNV.this.setTitle( "TNV" );
+					TNV.this.saveMenuItem.setEnabled( false );
+					TNV.this.exportMenuItem.setEnabled( false );
+					TNV.this.closeMenuItem.setEnabled( false );
+					TNV.this.detailsMenuItem.setEnabled( false );
+					TNV.this.portsMenuItem.setEnabled( false );
+					TNV.this.resetMenuItem.setEnabled( false );
+					try {
+						TNVDbUtil.getInstance().removeData();
+					}
+					catch (SQLException ex) {
+						TNVErrorDialog.createTNVErrorDialog(this.getClass(), "Error destroying database", ex);
+					}
+				}
+			} );
+		}
+
 		this.importMenuItem = new JMenuItem( "Import pcap file..." );
 		this.importMenuItem.setAccelerator( KeyStroke.getKeyStroke( 'I', Toolkit.getDefaultToolkit()
 				.getMenuShortcutKeyMask() ) );
@@ -315,6 +361,8 @@ public class TNV extends JFrame {
 		fileMenu.add( this.openMenuItem );
 		fileMenu.add( this.saveMenuItem );
 		fileMenu.add( this.closeMenuItem );
+		if ( ! TNVDbUtil.getType().equals(TNVDbUtil.DB_TYPE.HSQLDB) )
+			fileMenu.add( this.removeDataMenuItem );
 		fileMenu.add( new JSeparator() );
 		fileMenu.add( this.importMenuItem );
 		fileMenu.add( this.exportMenuItem );
@@ -608,7 +656,8 @@ public class TNV extends JFrame {
 	 * @return success
 	 */
 	private boolean openMySqlDB( ) {
-		TNVTimeChooserDialog.createTNVTimeChooserDialog();
+		if (TNVTimeChooserDialog.createTNVTimeChooserDialog() == null)
+			return false;
 		this.startTime = new Date();
 		TNVDbUtil.getInstance().setupHosts();
 		setupTNV();
