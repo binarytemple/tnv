@@ -8,7 +8,8 @@ rm $BASE_DIR/tnv_java_$VERSION.zip
 cd $BASE_DIR
 mkdir -p $DEST
 cp -r ../TNV/* $DEST
-cp ../readmes/* $DEST
+mkdir $DEST/docs
+cp ../readmes/* $DEST/docs
 find $DEST -name CVS -type d -exec rm -rf {} \;
 zip -qr tnv_java_$VERSION.zip $DEST
 rm -rf $DEST
@@ -18,8 +19,8 @@ echo "Created tnv_java_$VERSION.zip"
 echo "Uploaded tnv_java_$VERSION.zip to upload.sourceforge.net"
 
 cd ..
-mkdir -p mac_x86_binary/tnv_x86-$VERSION/tnv_osx_x86-$VERSION
-cp readmes/* mac_x86_binary/tnv_x86-$VERSION/tnv_osx_x86-$VERSION
-mkdir -p mac_ppc_binary/tnv_ppc-$VERSION/tnv_osx_ppc-$VERSION
-cp readmes/* mac_ppc_binary/tnv_ppc-$VERSION/tnv_osx_ppc-$VERSION
+mkdir -p mac_x86_binary/tnv_x86-$VERSION/tnv_osx_x86-$VERSION/docs
+cp readmes/* mac_x86_binary/tnv_x86-$VERSION/tnv_osx_x86-$VERSION/docs
+mkdir -p mac_ppc_binary/tnv_ppc-$VERSION/tnv_osx_ppc-$VERSION/docs
+cp readmes/* mac_ppc_binary/tnv_ppc-$VERSION/tnv_osx_ppc-$VERSION/docs
 echo 'Created mac directories'
