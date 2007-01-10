@@ -34,7 +34,7 @@ public class TNVPreferenceData {
 	public final static int SORT_ALPHA = 4;
 	public final static int SORT_ALPHA_REVERSE = 5;
 	
-	private final static String PROPERTIES_FILE = "tnv.properties";
+	private final static String PROPERTIES_FILE = "config/tnv.properties";
 
 	// Default Settings
 	private final static int DEFAULT_LOCAL_SORT = SORT_ARRIVAL;
