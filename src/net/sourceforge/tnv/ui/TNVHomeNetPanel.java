@@ -84,7 +84,7 @@ public class TNVHomeNetPanel extends JPanel {
 		String[] parsedNet = new String[4];
 		StringTokenizer st = new StringTokenizer( this.localNet, "." );
 		int i = 0;
-		int nm = 3; // determines the netmask from loaded network address (based on non-0 quad)
+		int nm = 2; // determines the netmask from loaded network address (based on non-0 quad)
 		boolean found = false;
 		while ( st.hasMoreTokens() ) {
 			String s = st.nextToken();

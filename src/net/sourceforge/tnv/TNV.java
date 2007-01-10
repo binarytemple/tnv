@@ -198,9 +198,6 @@ public class TNV extends JFrame {
 			}
 		} );
 
-		// Add main UI to panel
-		this.vui = new TNVUIManager();
-
 		// check if the home network is defined already in the preferences
 		// or open up a dialog box prompting for it
 		String homeNet = TNVPreferenceData.getInstance().getHomeNet();
@@ -211,6 +208,9 @@ public class TNV extends JFrame {
 			TNVHomeNetDialog.createTNVHomeNetDialog();
 		}
 			
+		// Add main UI to panel
+		this.vui = new TNVUIManager();
+
 		// choose a type of DB connection before showing frame
 		TNVDbTypeChooserDialog.createTNVDbTypeChooserDialog();
 		
