@@ -188,7 +188,7 @@ public class TNVPreferenceData {
 			out.close();
 		}
 		catch ( Exception e ) {
-			System.out.println( "Could not save preference file: " + e.getMessage() );
+			System.err.println( "Could not save preference file: " + e.getMessage() );
 		}
 	}
 

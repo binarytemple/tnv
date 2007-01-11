@@ -988,7 +988,7 @@ public class TNV extends JFrame {
 		// check version - must be 1.5+ 
 		String version = System.getProperty("java.version");
 		if ( version.startsWith("1.2") || version.startsWith("1.3") || version.startsWith("1.4") ) {
-			System.out.println ("\nJava " + version + " is not supported:   tnv requires JRE 1.5 or higher\n\n");
+			System.err.println ("\nJava " + version + " is not supported:   tnv requires JRE 1.5 or higher\n\n");
 			System.exit(1);
 		}
 		

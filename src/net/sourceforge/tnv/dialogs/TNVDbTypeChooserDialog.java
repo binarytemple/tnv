@@ -73,7 +73,7 @@ public class TNVDbTypeChooserDialog extends JDialog {
 			@Override
 			public void windowClosing( WindowEvent evt ) {
 				if ( ! selectionMade ) {
-					System.out.println("You must choose a database type. Exiting...");
+					System.err.println("You must choose a database type. Exiting...");
             		System.exit( 1 );
 				}
 			}
@@ -287,7 +287,7 @@ public class TNVDbTypeChooserDialog extends JDialog {
         this.cancelButton.setText("Cancel");
         this.cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-            	System.out.println("You must choose a database type. Exiting...");
+            	System.err.println("You must choose a database type. Exiting...");
             	System.exit( 1 );
             }
         });
@@ -322,14 +322,13 @@ public class TNVDbTypeChooserDialog extends JDialog {
     				}
     				catch (SQLException e) {
     					if ( e.getErrorCode() == 1045 ) {
-    						System.out.println("Unable to open mysql db. Error " + e.getErrorCode() +
+    						System.err.println("Unable to open mysql db. Error " + e.getErrorCode() +
     								"\n" + e.getMessage());
     						System.exit( 1 );
     					}
     					else 	
-    						System.out.println("Unable to open mysql db. Error " + e.getErrorCode());
-    					System.out.println(e.getMessage());
-    					e.printStackTrace();
+    						System.err.println("Unable to open mysql db. Error " + e.getErrorCode() +
+    								"\n" + e.getMessage());
     				}
     			}
                 selectionMade = true;

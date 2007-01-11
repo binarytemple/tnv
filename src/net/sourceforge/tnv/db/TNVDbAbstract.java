@@ -147,7 +147,7 @@ public abstract class TNVDbAbstract implements TNVDbInterface {
 			rs.close();
 		}
 		catch ( SQLException sqlex ) {
-			System.out.println( "SQL Error getting packet count for host (" + host + "): " + sqlex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "SQL Error getting packet count for host " + host, sqlex);
 		}
 		return count;
 	}
@@ -179,8 +179,8 @@ public abstract class TNVDbAbstract implements TNVDbInterface {
 			rs.close();
 		}
 		catch ( SQLException sqlex ) {
-			System.out.println( "SQL Error getting packet count for hosts (src: " + src + ", dst" + dst + "): "
-					+ sqlex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "SQL Error getting packet count for hosts " + 
+					"(src: " + src + ", dst" + dst + ")", sqlex);
 		}
 		return count;
 	}
@@ -208,8 +208,8 @@ public abstract class TNVDbAbstract implements TNVDbInterface {
 			rs.close();
 		}
 		catch ( SQLException sqlex ) {
-			System.out.println( "SQL Error getting packet count for times (start: " + start + ", end" + end + "): "
-					+ sqlex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "SQL Error getting packet count for times " + 
+					"(start: " + start + ", end" + end + ")", sqlex);
 		}
 		return count;
 	}
@@ -300,7 +300,8 @@ public abstract class TNVDbAbstract implements TNVDbInterface {
 			rs.close();
 		}
 		catch ( SQLException sqlex ) {
-			System.out.println( "SQL Error inserting host: " + sqlex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "SQL Error inserting host " + name
+					+ " into " + HOST_TABLE, sqlex);
 		}
 
 	}
@@ -354,55 +355,48 @@ public abstract class TNVDbAbstract implements TNVDbInterface {
 	 * @param name the String name to add to lists
 	 */
 	protected void addPacket( RawPacket rawPacket ) {
-		try {
-			Timestamp time = new Timestamp( ( rawPacket.getTimeval().getDate() ).getTime() );
-			Packet packet = PacketFactory.dataToPacket( LinkLayers.IEEE802, rawPacket.getData() );
-			IPPacket ipPacket = (IPPacket) packet;
-			String srcAddr = ipPacket.getSourceAddress();
-			String dstAddr = ipPacket.getDestinationAddress();
-			TNVPacket tnvpacket;
-			if ( ipPacket instanceof TCPPacket ) {
-				TCPPacket tcpPacket = (TCPPacket) ipPacket;
-				tnvpacket = new TNVPacket( time, srcAddr, tcpPacket.getSourcePort(), 
-						dstAddr, tcpPacket.getDestinationPort(), ipPacket.getProtocol(),
-						ipPacket.getTimeToLive(), ipPacket.getLength(),
-						tcpPacket.isSyn(), tcpPacket.isAck(), tcpPacket.isFin(),
-						tcpPacket.isUrg(), tcpPacket.isPsh(), tcpPacket.isRst());
-			}
-			else if ( ipPacket instanceof UDPPacket ) {
-				UDPPacket udpPacket = (UDPPacket) ipPacket;
-				tnvpacket = new TNVPacket( time, srcAddr, udpPacket.getSourcePort(), 
-						dstAddr, udpPacket.getDestinationPort(), ipPacket.getProtocol(),
-						ipPacket.getTimeToLive(), ipPacket.getLength() );
-			}
-			else {
-				tnvpacket = new TNVPacket( time, srcAddr, -1, dstAddr, -1, ipPacket.getProtocol(),
-						ipPacket.getTimeToLive(), ipPacket.getLength() );
-			}			
-			
-			List<TNVPacket> l;
-			if ( TNVUtil.isOnHomeNet( srcAddr, TNVPreferenceData.getInstance().getHomeNet() ) ) {
-				if ( this.getLocalHostMap().get( srcAddr ).containsKey( time ) )
-					l = this.getLocalHostMap().get( srcAddr ).get( time );
-				else
-					l = new ArrayList<TNVPacket>();
-				l.add( tnvpacket );
-				this.getLocalHostMap().get( srcAddr ).put( time, l );
-			}
-			if ( TNVUtil.isOnHomeNet( dstAddr, TNVPreferenceData.getInstance().getHomeNet() ) ) {
-				if ( this.getLocalHostMap().get( dstAddr ).containsKey( time ) )
-					l = this.getLocalHostMap().get( dstAddr ).get( time );
-				else
-					l = new ArrayList<TNVPacket>();
-				l.add( tnvpacket );			
-				this.getLocalHostMap().get( dstAddr ).put( time, l );
-			}
-
+		Timestamp time = new Timestamp( ( rawPacket.getTimeval().getDate() ).getTime() );
+		Packet packet = PacketFactory.dataToPacket( LinkLayers.IEEE802, rawPacket.getData() );
+		IPPacket ipPacket = (IPPacket) packet;
+		String srcAddr = ipPacket.getSourceAddress();
+		String dstAddr = ipPacket.getDestinationAddress();
+		TNVPacket tnvpacket;
+		if ( ipPacket instanceof TCPPacket ) {
+			TCPPacket tcpPacket = (TCPPacket) ipPacket;
+			tnvpacket = new TNVPacket( time, srcAddr, tcpPacket.getSourcePort(), 
+					dstAddr, tcpPacket.getDestinationPort(), ipPacket.getProtocol(),
+					ipPacket.getTimeToLive(), ipPacket.getLength(),
+					tcpPacket.isSyn(), tcpPacket.isAck(), tcpPacket.isFin(),
+					tcpPacket.isUrg(), tcpPacket.isPsh(), tcpPacket.isRst());
 		}
-		catch ( Exception e ) {
-			System.out.println( "Error adding packet to TNV data: " + e.getMessage() );
+		else if ( ipPacket instanceof UDPPacket ) {
+			UDPPacket udpPacket = (UDPPacket) ipPacket;
+			tnvpacket = new TNVPacket( time, srcAddr, udpPacket.getSourcePort(), 
+					dstAddr, udpPacket.getDestinationPort(), ipPacket.getProtocol(),
+					ipPacket.getTimeToLive(), ipPacket.getLength() );
 		}
+		else {
+			tnvpacket = new TNVPacket( time, srcAddr, -1, dstAddr, -1, ipPacket.getProtocol(),
+					ipPacket.getTimeToLive(), ipPacket.getLength() );
+		}			
 
+		List<TNVPacket> l;
+		if ( TNVUtil.isOnHomeNet( srcAddr, TNVPreferenceData.getInstance().getHomeNet() ) ) {
+			if ( this.getLocalHostMap().get( srcAddr ).containsKey( time ) )
+				l = this.getLocalHostMap().get( srcAddr ).get( time );
+			else
+				l = new ArrayList<TNVPacket>();
+			l.add( tnvpacket );
+			this.getLocalHostMap().get( srcAddr ).put( time, l );
+		}
+		if ( TNVUtil.isOnHomeNet( dstAddr, TNVPreferenceData.getInstance().getHomeNet() ) ) {
+			if ( this.getLocalHostMap().get( dstAddr ).containsKey( time ) )
+				l = this.getLocalHostMap().get( dstAddr ).get( time );
+			else
+				l = new ArrayList<TNVPacket>();
+			l.add( tnvpacket );			
+			this.getLocalHostMap().get( dstAddr ).put( time, l );
+		}
 	}
 	
 }

@@ -80,8 +80,9 @@ public class TNVDbMysql extends TNVDbAbstract implements TNVDbInterface {
 			Class.forName( JDBC_DRIVER ).newInstance();
 		}
 		catch ( Exception e ) {
-			TNVErrorDialog.createTNVErrorDialog(this.getClass(), 
-					"Error loading JDBC driver (" + JDBC_DRIVER + "): " + e.getMessage() );
+			System.err.println( "Error loading JDBC driver (" + JDBC_DRIVER + "): " + e.getMessage() );
+			System.err.println( "Exiting...");
+			System.exit(1);
 		}
 		//jdbc:mysql://[host:port],[host:port].../[database][?propertyName1][=propertyValue1][&propertyName2][=propertyValue2]...
 		this.conn = DriverManager.getConnection( JDBC_CONNECT + "//" + path 
@@ -227,13 +228,13 @@ public class TNVDbMysql extends TNVDbAbstract implements TNVDbInterface {
 				try {
 					this.addPacket( (RawPacket) new ObjectInputStream(rs.getBlob(1).getBinaryStream()).readObject() );
 				}
-				catch (Exception e) {
-					System.out.println( "Error getting packet: " + e.getMessage() );
+				catch (Exception ex) {
+					TNVErrorDialog.createTNVErrorDialog(this.getClass(), "Error adding packet while setting up host", ex);
 				}
 			}
 		}
 		catch ( SQLException sqlex ) {
-			System.out.println( "SQL Error creating packet statement: " + sqlex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "SQL error creating packet statement", sqlex);
 		}
 	}
 
@@ -261,17 +262,17 @@ public class TNVDbMysql extends TNVDbAbstract implements TNVDbInterface {
 					TcpdumpWriter.appendPacket( filePath, p, endian );
 				}
 				catch ( IOException ioex ) {
-					System.out.println( "Unable to write tcpdump data: " + ioex.getMessage() );
+					TNVErrorDialog.createTNVErrorDialog(this.getClass(), "IO Error: unable to write tcpdump data", ioex);
 					return false;
 				}
 				catch ( Exception ex ) {
-					System.out.println( "Unable to write tcpdump data: " + ex.getMessage() );
+					TNVErrorDialog.createTNVErrorDialog(this.getClass(), "Unable to write tcpdump data", ex);
 					return false;
 				}
 			}
 		}
-		catch ( SQLException e ) {
-			System.out.println( "Unable to read packets from database: " + e.getMessage() );
+		catch ( SQLException sqlex ) {
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "SQL Error: unable to write tcpdump data", sqlex);
 			return false;
 		}
 		return true;
@@ -296,13 +297,13 @@ public class TNVDbMysql extends TNVDbAbstract implements TNVDbInterface {
 				l.add( (RawPacket) new ObjectInputStream(rs.getBlob(1).getBinaryStream()).readObject() );
 		}
 		catch ( SQLException sqlex ) {
-			System.out.println( "SQL Error getting all packets: " + sqlex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "SQL Error getting all packets", sqlex);
 		}
 		catch ( IOException ioex ) {
-			System.out.println( "IO Error getting all raw packets: " + ioex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "IO Error getting all packets", ioex);
 		}
 		catch ( Exception ex ) {
-			System.out.println( "Error getting all packets: " + ex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "Error getting all packets", ex);
 		}
 		return l;
 	}
@@ -339,13 +340,13 @@ public class TNVDbMysql extends TNVDbAbstract implements TNVDbInterface {
 			rs.close();
 		}
 		catch ( SQLException sqlex ) {
-			System.out.println( "SQL Error getting packet list for host (" + name + ": " + sqlex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "SQL Error getting packet list for host: " + name, sqlex);
 		}
 		catch ( IOException ioex ) {
-			System.out.println( "IO Error getting packet list for host (" + name + ": " + ioex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "IO Error getting packet list for host: " + name, ioex);
 		}
 		catch ( Exception ex ) {
-			System.out.println( "Error getting packet list for host (" + name + ": " + ex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "Error getting packet list for host: " + name, ex);
 		}
 		return l;
 	}
@@ -366,7 +367,7 @@ public class TNVDbMysql extends TNVDbAbstract implements TNVDbInterface {
 				count = rs.getInt( 1 );
 		}
 		catch ( SQLException sqlex ) {
-			System.out.println( "SQL Error getting total host count: " + sqlex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "SQL Error getting total host count", sqlex);
 		}
 		return count;
 	}
@@ -383,7 +384,7 @@ public class TNVDbMysql extends TNVDbAbstract implements TNVDbInterface {
 				time = rs.getTimestamp( 1 );
 		}
 		catch ( SQLException sqlex ) {
-			System.out.println( "SQL Error getting minimum timestamp: " + sqlex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "SQL Error getting minimum timestamp", sqlex);
 		}
 		return time;
 	}
@@ -400,7 +401,7 @@ public class TNVDbMysql extends TNVDbAbstract implements TNVDbInterface {
 				time = rs.getTimestamp( 1 );
 		}
 		catch ( SQLException sqlex ) {
-			System.out.println( "SQL Error getting maximum timestamp: " + sqlex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "SQL Error getting maximum timestamp", sqlex);
 		}
 		return time;
 	}
@@ -470,7 +471,7 @@ public class TNVDbMysql extends TNVDbAbstract implements TNVDbInterface {
 				count = rs.getInt( 1 );
 		}
 		catch ( SQLException sqlex ) {
-			System.out.println( "SQL Error getting packet count for host " + host + ": " + sqlex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "SQL Error getting packet count for host " + host, sqlex);
 		}
 		return count;
 	}
@@ -489,7 +490,7 @@ public class TNVDbMysql extends TNVDbAbstract implements TNVDbInterface {
 			}
 		}
 		catch ( SQLException sqlex ) {
-			System.out.println( "SQL Error creating links statement: " + sqlex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "SQL Error creating links select statement", sqlex);
 		}
 		
 		return this.selectLinksStmt;
@@ -515,7 +516,7 @@ public class TNVDbMysql extends TNVDbAbstract implements TNVDbInterface {
 			this.selectAllInPortsStmt.setTimestamp(2, this.maxTime);
 		}
 		catch ( SQLException sqlex ) {
-			System.out.println( "SQL Error creating ports statement: " + sqlex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "SQL Error creating all incoming ports select statement", sqlex);
 		}
 		return this.selectAllInPortsStmt;
 	}
@@ -539,7 +540,7 @@ public class TNVDbMysql extends TNVDbAbstract implements TNVDbInterface {
 			this.selectAllOutPortsStmt.setTimestamp(2, this.maxTime);
 		}
 		catch ( SQLException sqlex ) {
-			System.out.println( "SQL Error creating ports statement: " + sqlex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "SQL Error creating all outgoing ports select statement", sqlex);
 		}
 		return this.selectAllOutPortsStmt;
 	}
@@ -561,7 +562,7 @@ public class TNVDbMysql extends TNVDbAbstract implements TNVDbInterface {
 			}
 		}
 		catch ( SQLException sqlex ) {
-			System.out.println( "SQL Error creating ports statement: " + sqlex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "SQL Error creating incoming ports select statement", sqlex);
 		}
 		return this.selectInPortsStmt;
 	}
@@ -584,7 +585,7 @@ public class TNVDbMysql extends TNVDbAbstract implements TNVDbInterface {
 			}
 		}
 		catch ( SQLException sqlex ) {
-			System.out.println( "SQL Error creating ports statement: " + sqlex.getMessage() );
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "SQL Error creating outgoing ports select statement", sqlex);
 		}
 		return this.selectOutPortsStmt;
 	}

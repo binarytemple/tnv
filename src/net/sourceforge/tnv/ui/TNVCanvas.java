@@ -12,22 +12,29 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
 import net.sourceforge.tnv.TNV;
+import net.sourceforge.tnv.dialogs.TNVErrorDialog;
 import net.sourceforge.tnv.dialogs.TNVPreferenceDialog;
-
+import net.sourceforge.tnv.shared.BareBonesBrowserLaunch;
+import net.sourceforge.tnv.util.TNVUtil;
 import edu.umd.cs.piccolo.PCanvas;
 import edu.umd.cs.piccolo.PLayer;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolo.nodes.PText;
 
 /**
  * TNVCanvas
@@ -38,9 +45,12 @@ public class TNVCanvas extends PCanvas {
 	public static int BASE_LAYER = 0;
 	public static int TOOLTIP_LAYER = 1;
 
+	private static long COMMAND_TIMEOUT = 15000; // millisec to timeout a long running external process
+	
 	private static int REMOTE_GRAPH_WIDTH = 100; // remote hosts label size
 	private static int INTERGRAPH_WIDTH = 120; // space between local and remote graph
 	private static int SIDE_LABEL_WIDTH = 140; // right side label size
+
 	public static int TOP_LABEL_HEIGHT = 20; // top label size
 
 	// Layers
@@ -66,7 +76,7 @@ public class TNVCanvas extends PCanvas {
 	 */
 	public TNVCanvas() {
 		super();
-
+		
 		this.localGraph = new TNVLocalHostsGraph( this );
 		this.remoteGraph = new TNVRemoteHostsGraph( this );
 		this.interGraph = new TNVInterGraph( this );
@@ -270,6 +280,9 @@ public class TNVCanvas extends PCanvas {
 			}
 		} );
 		this.popup.add( prefsMenuItem );
+
+		// setup external data tools
+		this.setupDataTools(node);
 		
 		this.popup.show( this, (int) event.getCanvasPosition().getX(), (int) event.getCanvasPosition().getY() );
 
@@ -290,6 +303,96 @@ public class TNVCanvas extends PCanvas {
 		return event.isPopupTrigger();
 	}
 
+	
+	/**
+	 * Set up external data tools
+	 * @param node
+	 */
+	private void setupDataTools(PNode node) {
+		if ( node instanceof TNVHost || node instanceof TNVLocalHostCell || node instanceof PText ) {
+			final String hostName;
+			
+			if ( node instanceof PText ) {
+				PNode parent = node.getParent();
+				if ( parent instanceof TNVHost )
+					hostName = ((TNVHost) parent).getName();
+				else
+					return;
+			}
+			else if ( node instanceof TNVHost )
+				hostName = ((TNVHost) node).getName();
+			else
+				hostName = ((TNVLocalHostCell) node).getName();
+			
+			this.popup.addSeparator();
+
+			TNVDataToolsMenuItem menuItem;
+			for ( int i=0; i<TNVDataTools.getDataTools().length; i++ ) {
+				menuItem = TNVDataTools.getDataTools()[i];
+				final String menuText = menuItem.getName().replaceAll("##IP##", hostName);
+				menuItem.setText(menuText);
+				String type = menuItem.getType();
+				final String cmd = menuItem.getCommand().replaceAll("##IP##", hostName);
+				if ( type.equalsIgnoreCase("url") ) {
+					menuItem.setText(menuItem.getText() + " (URL)");
+					menuItem.addActionListener( new ActionListener() {
+						public void actionPerformed( ActionEvent e ) {
+							BareBonesBrowserLaunch.openURL(cmd);
+						}
+					} );
+				}
+				else {
+					// Only show sh for Unix/Mac and exe for Windows
+					String os = System.getProperty("os.name").toLowerCase();
+				    if ( os.indexOf("windows") != -1 && ! type.equalsIgnoreCase("exe") )
+				       continue;
+				    else if ( os.indexOf("windows") == -1 && ! type.equalsIgnoreCase("sh") )
+				       continue;
+					
+				    // may be long running, so use SwingWorker to put in thread
+					menuItem.addActionListener( new ActionListener() {
+						public void actionPerformed( ActionEvent e ) {
+							TNV.setWaitCursor();
+							try {
+								//Process proc = Runtime.getRuntime().exec(cmd);
+								Process proc = TNVUtil.runProcess(cmd, 500, COMMAND_TIMEOUT);
+								if ( proc == null ) {
+									TNV.setDefaultCursor();
+									JOptionPane.showMessageDialog(null, "The command timed out after " 
+											+ (COMMAND_TIMEOUT / 1000) + " seconds.",
+											"Command Timeout", JOptionPane.WARNING_MESSAGE);
+									return;
+								}
+								
+								BufferedReader stdInput = new BufferedReader(
+										new InputStreamReader(proc.getInputStream()));
+								BufferedReader stdError = new BufferedReader(
+										new InputStreamReader(proc.getErrorStream()));
+								String line, output = "";
+								while ((line = stdInput.readLine()) != null) 
+									output += line + "\n";
+								if ( stdError.ready() ) {
+									output += "\n\nError:\n";
+									while ((line = stdError.readLine()) != null) 
+										output += line + "\n";
+								}
+								JOptionPane.showMessageDialog(null, output,
+										"Command Output", JOptionPane.INFORMATION_MESSAGE);
+							}
+							catch (InterruptedException ex) {
+								TNVErrorDialog.createTNVErrorDialog(this.getClass(), "Data tool interrupted", ex); 
+							}
+							catch (IOException ex) {
+								TNVErrorDialog.createTNVErrorDialog(this.getClass(), "Data tool IO error", ex); 
+							}
+							TNV.setDefaultCursor();
+						}
+					} );					
+				}
+				this.popup.add(menuItem);
+			}
+		}
+	}
 	
 	/**
 	 * @return the interGraph

@@ -17,6 +17,7 @@ import net.sourceforge.jpcap.net.RawPacket;
 import net.sourceforge.jpcap.net.TCPPacket;
 import net.sourceforge.jpcap.net.UDPPacket;
 import net.sourceforge.tnv.db.TNVDbUtil;
+import net.sourceforge.tnv.dialogs.TNVErrorDialog;
 
 /**
  * TNVPacketHandler
@@ -64,8 +65,8 @@ public class TNVPacketHandler implements RawPacketListener {
 					ipPacket.getTimeToLive(), ipPacket.getLength(), rawPacket );
 
 		}
-		catch ( Exception e ) {
-			System.out.println( "Error during packet capture: " + e.getMessage() );
+		catch ( Exception ex ) {
+			TNVErrorDialog.createTNVErrorDialog(this.getClass(), "Error during packet capture", ex);
 		}
 	}
 }

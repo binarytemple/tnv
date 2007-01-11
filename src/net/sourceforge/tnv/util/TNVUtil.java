@@ -8,6 +8,7 @@ package net.sourceforge.tnv.util;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
@@ -249,6 +250,35 @@ public final class TNVUtil {
 		return s;
 	}
 
+	public static Process runProcess(String commands, long interval, long timeout) throws IOException, InterruptedException {
+		Process process = Runtime.getRuntime().exec(commands);
+		long	time_waiting = 0;
+		boolean	process_finished = false;	
+		while (time_waiting < timeout && ! process_finished) {
+			process_finished = true;
+			try {
+				Thread.sleep(interval);
+			}
+			catch (InterruptedException e) {
+				e.fillInStackTrace();
+				throw e;
+			}
+			
+			try {
+				process.exitValue();
+			}
+			catch (IllegalThreadStateException e) {
+				// process hasn't finished yet
+				process_finished = false;
+			}
+			time_waiting += interval;
+		}
+		if (process_finished)
+			return process;
+
+		process.destroy();
+		return null;
+	}
 
 	/**
 	 * Create color maps

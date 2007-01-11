@@ -16,6 +16,7 @@ import java.awt.event.ActionListener;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
+import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -62,6 +63,8 @@ public class TNVErrorDialog extends JDialog {
 				initComponents();				
 			}
 		});
+		
+		System.err.println(new Date().toString() + "Exception: " + message + "\n" + ex.getLocalizedMessage());
 	}
 
 	private void initComponents() {

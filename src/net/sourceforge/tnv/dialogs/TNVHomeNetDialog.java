@@ -53,7 +53,7 @@ public class TNVHomeNetDialog extends JDialog {
 		cancelButton.setToolTipText("Exit without entering a home network");
 		cancelButton.addActionListener( new ActionListener() {
 			public void actionPerformed( ActionEvent e ) {
-				System.out.println("You must choose a home network, exiting...");
+				System.err.println("You must choose a home network, exiting...");
 				System.exit(1);
 			}
 		} );
