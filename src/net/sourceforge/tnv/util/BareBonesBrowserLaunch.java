@@ -1,5 +1,5 @@
 
-package net.sourceforge.tnv.shared;
+package net.sourceforge.tnv.util;
 
 /////////////////////////////////////////////////////////
 //Bare Bones Browser Launch                          //

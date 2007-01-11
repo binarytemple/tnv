@@ -12,7 +12,7 @@ import java.sql.SQLException;
 
 import net.sourceforge.tnv.db.TNVDbUtil;
 import net.sourceforge.tnv.dialogs.TNVErrorDialog;
-import net.sourceforge.tnv.shared.SwingWorker;
+import net.sourceforge.tnv.util.SwingWorker;
 
 import edu.umd.cs.piccolo.PNode;
 

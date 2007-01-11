@@ -27,7 +27,7 @@ import javax.swing.JPopupMenu;
 import net.sourceforge.tnv.TNV;
 import net.sourceforge.tnv.dialogs.TNVErrorDialog;
 import net.sourceforge.tnv.dialogs.TNVPreferenceDialog;
-import net.sourceforge.tnv.shared.BareBonesBrowserLaunch;
+import net.sourceforge.tnv.util.BareBonesBrowserLaunch;
 import net.sourceforge.tnv.util.TNVUtil;
 import edu.umd.cs.piccolo.PCanvas;
 import edu.umd.cs.piccolo.PLayer;

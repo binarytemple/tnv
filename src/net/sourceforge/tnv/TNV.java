@@ -459,7 +459,7 @@ public class TNV extends JFrame {
 		JMenuItem forumMenuItem = new JMenuItem( "Help Forums" );
 		forumMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( ActionEvent e ) {
-				net.sourceforge.tnv.shared.BareBonesBrowserLaunch.openURL(
+				net.sourceforge.tnv.util.BareBonesBrowserLaunch.openURL(
 						"http://sourceforge.net/forum/?group_id=182807");
 			}
 		} );
@@ -467,7 +467,7 @@ public class TNV extends JFrame {
 		JMenuItem bugMenuItem = new JMenuItem( "Report Bug" );
 		bugMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( ActionEvent e ) {
-				net.sourceforge.tnv.shared.BareBonesBrowserLaunch.openURL(
+				net.sourceforge.tnv.util.BareBonesBrowserLaunch.openURL(
 						"http://sourceforge.net/tracker/?func=add&group_id=182807&atid=902696");
 			}
 		} );
@@ -475,7 +475,7 @@ public class TNV extends JFrame {
 		JMenuItem featureMenuItem = new JMenuItem( "Request Feature" );
 		featureMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( ActionEvent e ) {
-				net.sourceforge.tnv.shared.BareBonesBrowserLaunch.openURL(
+				net.sourceforge.tnv.util.BareBonesBrowserLaunch.openURL(
 						"http://sourceforge.net/tracker/?func=add&group_id=182807&atid=902699");
 			}
 		} );
@@ -483,7 +483,7 @@ public class TNV extends JFrame {
 		JMenuItem projectMenuItem = new JMenuItem( "Project Home Page" );
 		projectMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( ActionEvent e ) {
-				net.sourceforge.tnv.shared.BareBonesBrowserLaunch.openURL(
+				net.sourceforge.tnv.util.BareBonesBrowserLaunch.openURL(
 						"http://sourceforge.net/projects/tnv/");
 			}
 		} );
@@ -491,7 +491,7 @@ public class TNV extends JFrame {
 		JMenuItem sfMenuItem = new JMenuItem( "SourceForge Home Page" );
 		sfMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( ActionEvent e ) {
-				net.sourceforge.tnv.shared.BareBonesBrowserLaunch.openURL(
+				net.sourceforge.tnv.util.BareBonesBrowserLaunch.openURL(
 						"http://sourceforge.net/");
 			}
 		} );
