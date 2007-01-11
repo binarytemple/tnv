@@ -1,0 +1,18 @@
+#Data tools are external commands and URLs that can be used within tnv
+#Format of each row is: TYPE|MENU|COMMAND
+#Valid TYPEs are:
+#  URL to open URL in a web browser
+#  EXE to run a Windows command and show output in a dialog
+#  SH to run a Unix/Mac shell command and show output in a dialog
+#MENU is the name of the context menu
+#COMMAND is the name of the exe or sh command to run or the URL to open
+#Beware of long running commands!
+#To insert an IP address into a MENU or COMMAND use ##IP##
+URL|whois (Arin) ##IP##|http://ws.arin.net/whois/?queryinput=##IP##
+URL|reverse DNS lookup for ##IP##|http://www.zoneedit.com/lookup.html?ipaddress=##IP##&server=&reverse=Look+it+up
+URL|traceroute ##IP##|http://www.network-tools.com/default.asp?prog=trace&Netnic=whois.arin.net&host=##IP##
+URL|lookup ##IP##|http://www.network-tools.com/default.asp?prog=lookup&Netnic=whois.arin.net&host=##IP##
+SH|ping ##IP##|ping -c 3 -t 3 ##IP##
+SH|traceroute ##IP##|traceroute -w 3 -q 2 -m 50 ##IP##
+EXE|ping ##IP##|ping -n 3 -w 3 ##IP##
+EXE|traceroute ##IP##|tracert -w 3 -h 50 ##IP##
