@@ -1,3 +1,7 @@
+0.3.7 - 
+-External data tools for doing URL queries or running scripts
+-Improved error handling
+
 0.3.6 - 01/09/2007
 -Changed license to MIT for more flexibility
 -Sort by frequency

@@ -44,8 +44,6 @@ public class TNVCanvas extends PCanvas {
 
 	public static int BASE_LAYER = 0;
 	public static int TOOLTIP_LAYER = 1;
-
-	private static long COMMAND_TIMEOUT = 15000; // millisec to timeout a long running external process
 	
 	private static int REMOTE_GRAPH_WIDTH = 100; // remote hosts label size
 	private static int INTERGRAPH_WIDTH = 120; // space between local and remote graph
@@ -326,6 +324,10 @@ public class TNVCanvas extends PCanvas {
 			
 			this.popup.addSeparator();
 
+			// if there are no data tools, do nothing
+			if ( TNVDataTools.getDataTools() == null )
+				return;
+			
 			TNVDataToolsMenuItem menuItem;
 			for ( int i=0; i<TNVDataTools.getDataTools().length; i++ ) {
 				menuItem = TNVDataTools.getDataTools()[i];
@@ -342,24 +344,18 @@ public class TNVCanvas extends PCanvas {
 					} );
 				}
 				else {
-					// Only show sh for Unix/Mac and exe for Windows
-					String os = System.getProperty("os.name").toLowerCase();
-				    if ( os.indexOf("windows") != -1 && ! type.equalsIgnoreCase("exe") )
-				       continue;
-				    else if ( os.indexOf("windows") == -1 && ! type.equalsIgnoreCase("sh") )
-				       continue;
-					
+				    final int timeout = menuItem.getTimeout();
 				    // may be long running, so use SwingWorker to put in thread
 					menuItem.addActionListener( new ActionListener() {
 						public void actionPerformed( ActionEvent e ) {
 							TNV.setWaitCursor();
 							try {
 								//Process proc = Runtime.getRuntime().exec(cmd);
-								Process proc = TNVUtil.runProcess(cmd, 500, COMMAND_TIMEOUT);
+								Process proc = TNVUtil.runProcess(cmd, 500, timeout);
 								if ( proc == null ) {
 									TNV.setDefaultCursor();
 									JOptionPane.showMessageDialog(null, "The command timed out after " 
-											+ (COMMAND_TIMEOUT / 1000) + " seconds.",
+											+ (timeout / 1000) + " seconds.",
 											"Command Timeout", JOptionPane.WARNING_MESSAGE);
 									return;
 								}

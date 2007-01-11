@@ -9,26 +9,26 @@ import javax.swing.JMenuItem;
  */
 public class TNVDataToolsMenuItem extends JMenuItem {
 
+	// default timeout for operations (milliseconds)
+	private static int DEFAULT_DATA_TOOLS_TIMEOUT = 15000;
+	
 	private String type = "";
 	private String name = "";
 	private String command = "";
+	private int timeout = DEFAULT_DATA_TOOLS_TIMEOUT;
 	
 	/**
 	 * Constructor
+	 * @param type
+	 * @param name
+	 * @param command
 	 */
-	public TNVDataToolsMenuItem() {
-		super();
+	public TNVDataToolsMenuItem(String type, String name, String command) {
+		super(name);
+		this.type = type;
+		this.name = name;
+		this.command = command;
 	}
-
-
-	/**
-	 * @param text
-	 */
-	public TNVDataToolsMenuItem(String text) {
-		super(text);
-		name = text;
-	}
-
 
 	/**
 	 *
@@ -38,16 +38,6 @@ public class TNVDataToolsMenuItem extends JMenuItem {
 		return this.command;
 	}
 
-
-	/**
-	 *
-	 * @param command the String command to set
-	 */
-	public final void setCommand(String command) {
-		this.command = command;
-	}
-
-
 	/**
 	 *
 	 * @return the String TNVDataToolsMenuItem.java
@@ -55,16 +45,6 @@ public class TNVDataToolsMenuItem extends JMenuItem {
 	public final String getName() {
 		return this.name;
 	}
-
-
-	/**
-	 *
-	 * @param name the String name to set
-	 */
-	public final void setName(String name) {
-		this.name = name;
-	}
-
 
 	/**
 	 *
@@ -77,11 +57,18 @@ public class TNVDataToolsMenuItem extends JMenuItem {
 
 	/**
 	 *
-	 * @param type the String type to set
+	 * @return the int TNVDataToolsMenuItem.java
 	 */
-	public final void setType(String type) {
-		this.type = type;
+	public final int getTimeout() {
+		return this.timeout;
 	}
 
 
+	/**
+	 *
+	 * @param timeout the int timeout to set
+	 */
+	public final void setTimeout(int timeout) {
+		this.timeout = timeout;
+	}
 }
