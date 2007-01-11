@@ -18,11 +18,14 @@ import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.Date;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 /**
@@ -46,14 +49,20 @@ public class TNVErrorDialog extends JDialog {
 	private TNVErrorDialog(Class caller, String message, Exception ex) throws HeadlessException {
 		super();
 		
+		// print to standard error
+		System.err.println("\n\ntnv Exception: " + new Date().toString() + "\n" + message);
+		
 		messageString = message;
 		exception = ex;
 		
-		if ( caller != null ) 
+		if ( caller != null ) {
 			callingClassString = "Calling class: " + caller.getName();
+			System.err.println(callingClassString);
+		}
 		
 		if ( exception != null) {
 			exceptionMessageString = exception.getLocalizedMessage();
+			System.err.println(exceptionMessageString);
 			if ( exception instanceof SQLException )
 				exceptionCodeString = "(SQL Error Code: " + ((SQLException)exception).getErrorCode() + ")";
 		}
@@ -64,7 +73,6 @@ public class TNVErrorDialog extends JDialog {
 			}
 		});
 		
-		System.err.println(new Date().toString() + "Exception: " + message + "\n" + ex.getLocalizedMessage());
 	}
 
 	private void initComponents() {
@@ -75,7 +83,7 @@ public class TNVErrorDialog extends JDialog {
 		JScrollPane messageScrollPane = new JScrollPane(messageArea);
 		
 		messageArea.append(
-				"Error: " + "\n" +  
+				"tnv Error: " + "\n" +  
 				callingClassString + "\n" +
 				messageString + "\n" +
 				exceptionCodeString + "\n\n" +
@@ -107,11 +115,17 @@ public class TNVErrorDialog extends JDialog {
 		} );
 		buttonPanel.add( continueButton );
 
+		java.net.URL imgURL = TNVErrorDialog.class.getResource("../images/error_icon.png");
+		ImageIcon icon = new ImageIcon(imgURL);
+		JLabel errorLabel = new JLabel(icon, SwingConstants.CENTER);
+		errorLabel.setPreferredSize(new Dimension(80,80));
+		
+		this.getContentPane().add( errorLabel, java.awt.BorderLayout.WEST );
 		this.getContentPane().add( messageScrollPane, java.awt.BorderLayout.CENTER );
 		this.getContentPane().add( buttonPanel, java.awt.BorderLayout.SOUTH );
 		
 		this.getRootPane().setDefaultButton( continueButton );
-		this.setTitle("Error: " + exceptionCodeString);
+		this.setTitle("tnv Error  " + exceptionCodeString);
 		this.setModal(true);
 		this.setResizable(false);
 		
