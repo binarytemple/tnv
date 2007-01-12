@@ -13,22 +13,21 @@ import java.awt.event.ComponentEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
 import net.sourceforge.tnv.TNV;
-import net.sourceforge.tnv.dialogs.TNVErrorDialog;
 import net.sourceforge.tnv.dialogs.TNVPreferenceDialog;
 import net.sourceforge.tnv.util.BareBonesBrowserLaunch;
-import net.sourceforge.tnv.util.TNVUtil;
 import edu.umd.cs.piccolo.PCanvas;
 import edu.umd.cs.piccolo.PLayer;
 import edu.umd.cs.piccolo.PNode;
@@ -44,7 +43,7 @@ public class TNVCanvas extends PCanvas {
 
 	public static int BASE_LAYER = 0;
 	public static int TOOLTIP_LAYER = 1;
-	
+
 	private static int REMOTE_GRAPH_WIDTH = 100; // remote hosts label size
 	private static int INTERGRAPH_WIDTH = 120; // space between local and remote graph
 	private static int SIDE_LABEL_WIDTH = 140; // right side label size
@@ -53,7 +52,7 @@ public class TNVCanvas extends PCanvas {
 
 	// Layers
 	private PLayer nodeLayer, // base layer, for nodes
-			tooltipLayer = new PLayer(); // top layer, for tooltips
+	tooltipLayer = new PLayer(); // top layer, for tooltips
 
 	// graph node holds all of the drawing for local nodes
 	private TNVLocalHostsGraph localGraph;
@@ -68,13 +67,14 @@ public class TNVCanvas extends PCanvas {
 	// popup menu; items are added removed on the fly
 	private JPopupMenu popup = new JPopupMenu();
 
+	private boolean procInterrupted;
 
 	/**
 	 * Constructor
 	 */
 	public TNVCanvas() {
 		super();
-		
+
 		this.localGraph = new TNVLocalHostsGraph( this );
 		this.remoteGraph = new TNVRemoteHostsGraph( this );
 		this.interGraph = new TNVInterGraph( this );
@@ -108,13 +108,13 @@ public class TNVCanvas extends PCanvas {
 				TNVCanvas.this.localGraph.setBounds( getX() + REMOTE_GRAPH_WIDTH + INTERGRAPH_WIDTH, getY()
 						+ TOP_LABEL_HEIGHT, getWidth() - REMOTE_GRAPH_WIDTH - INTERGRAPH_WIDTH - SIDE_LABEL_WIDTH,
 						getHeight() - TOP_LABEL_HEIGHT - 2 );
-				
+
 				TNVCanvas.this.localGraph.layoutChildren();
 				TNVCanvas.this.remoteGraph.layoutChildren();
 			}
 		});
 
-		
+
 		// listen for initial setup property changes
 		String[] listenProps = { TNVModel.PROPERTY_SETUP, TNVModel.PROPERTY_IS_TIME_ADJUSTING };
 		TNVModel.getInstance().addPropertyChangeListener( listenProps, new PropertyChangeListener() {
@@ -185,7 +185,7 @@ public class TNVCanvas extends PCanvas {
 					else
 						clearSelectedNodes();
 				}
-					
+
 				// if a host cell is clicked twice, expand it
 				else if ( event.getClickCount() == 2 && pickedNode instanceof TNVLocalHostCell ) {
 					TNVLocalHostCell node = (TNVLocalHostCell) pickedNode;
@@ -270,7 +270,7 @@ public class TNVCanvas extends PCanvas {
 			}
 		} );
 		this.popup.add( resetMenuItem );
-		
+
 		JMenuItem prefsMenuItem = new JMenuItem( "Preferences..." );
 		prefsMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( ActionEvent e ) {
@@ -281,7 +281,7 @@ public class TNVCanvas extends PCanvas {
 
 		// setup external data tools
 		this.setupDataTools(node);
-		
+
 		this.popup.show( this, (int) event.getCanvasPosition().getX(), (int) event.getCanvasPosition().getY() );
 
 	}
@@ -301,7 +301,7 @@ public class TNVCanvas extends PCanvas {
 		return event.isPopupTrigger();
 	}
 
-	
+
 	/**
 	 * Set up external data tools
 	 * @param node
@@ -309,7 +309,7 @@ public class TNVCanvas extends PCanvas {
 	private void setupDataTools(PNode node) {
 		if ( node instanceof TNVHost || node instanceof TNVLocalHostCell || node instanceof PText ) {
 			final String hostName;
-			
+
 			if ( node instanceof PText ) {
 				PNode parent = node.getParent();
 				if ( parent instanceof TNVHost )
@@ -321,13 +321,13 @@ public class TNVCanvas extends PCanvas {
 				hostName = ((TNVHost) node).getName();
 			else
 				hostName = ((TNVLocalHostCell) node).getName();
-			
+
 			this.popup.addSeparator();
 
 			// if there are no data tools, do nothing
 			if ( TNVDataTools.getDataTools() == null )
 				return;
-			
+
 			TNVDataToolsMenuItem menuItem;
 			for ( int i=0; i<TNVDataTools.getDataTools().length; i++ ) {
 				menuItem = TNVDataTools.getDataTools()[i];
@@ -344,42 +344,43 @@ public class TNVCanvas extends PCanvas {
 					} );
 				}
 				else {
-				    final int timeout = menuItem.getTimeout();
-				    // may be long running, so use SwingWorker to put in thread
+					final int timeout = menuItem.getTimeout();
 					menuItem.addActionListener( new ActionListener() {
 						public void actionPerformed( ActionEvent e ) {
 							TNV.setWaitCursor();
+							procInterrupted=false;
+							final Process proc;
+							ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
+							pb.redirectErrorStream();
 							try {
-								//Process proc = Runtime.getRuntime().exec(cmd);
-								Process proc = TNVUtil.runProcess(cmd, 500, timeout);
-								if ( proc == null ) {
-									TNV.setDefaultCursor();
-									JOptionPane.showMessageDialog(null, "The command timed out after " 
-											+ (timeout / 1000) + " seconds.",
-											"Command Timeout", JOptionPane.WARNING_MESSAGE);
-									return;
-								}
-								
+								proc = pb.start();
+
+								new Timer().schedule(
+										new TimerTask() {
+											public void run() {
+												procInterrupted=true;
+												proc.destroy();
+											}
+										}, timeout);
+
+								proc.waitFor();
+
 								BufferedReader stdInput = new BufferedReader(
 										new InputStreamReader(proc.getInputStream()));
-								BufferedReader stdError = new BufferedReader(
-										new InputStreamReader(proc.getErrorStream()));
-								String line, output = "";
+								String textToDisplay = "";
+								String line;
 								while ((line = stdInput.readLine()) != null) 
-									output += line + "\n";
-								if ( stdError.ready() ) {
-									output += "\n\nError:\n";
-									while ((line = stdError.readLine()) != null) 
-										output += line + "\n";
-								}
-								JOptionPane.showMessageDialog(null, output,
+									textToDisplay += line + "\n";
+								stdInput.close();
+								JOptionPane.showMessageDialog(null, textToDisplay,
 										"Command Output", JOptionPane.INFORMATION_MESSAGE);
-							}
-							catch (InterruptedException ex) {
-								TNVErrorDialog.createTNVErrorDialog(this.getClass(), "Data tool interrupted", ex); 
-							}
-							catch (IOException ex) {
-								TNVErrorDialog.createTNVErrorDialog(this.getClass(), "Data tool IO error", ex); 
+							} 
+							catch (Exception ex) {
+								if ( procInterrupted )
+									JOptionPane.showMessageDialog(null, 
+											"The following command timed out after " 
+											+ (timeout/1000) + " seconds: \n\n" + cmd,
+											"Command Timed Out", JOptionPane.WARNING_MESSAGE);
 							}
 							TNV.setDefaultCursor();
 						}
@@ -389,7 +390,7 @@ public class TNVCanvas extends PCanvas {
 			}
 		}
 	}
-	
+
 	/**
 	 * @return the interGraph
 	 */
@@ -397,7 +398,7 @@ public class TNVCanvas extends PCanvas {
 		return this.interGraph;
 	}
 
-	
+
 	/**
 	 * @return the localGraph
 	 */
@@ -405,7 +406,7 @@ public class TNVCanvas extends PCanvas {
 		return this.localGraph;
 	}
 
-	
+
 	/**
 	 * @return the remoteGraph
 	 */

@@ -109,27 +109,27 @@ public class TNVDataTools {
 				if ( scanner.hasNext() )
 					type = scanner.next();
 				else {
-					System.err.println("Error parsing data tools line:  " + input);
+					System.err.println("Error parsing data tools, line:  " + input);
 					continue;
 				}
 				if ( scanner.hasNext() )
 					menu = scanner.next();
 				else {
-					System.err.println("Error parsing data tools line:  " + input);
+					System.err.println("Error parsing data tools, line:  " + input);
 					continue;
 				}
 				if ( scanner.hasNext() )
 					command = scanner.next();
 				else {
-					System.err.println("Error parsing data tools line:  " + input);
+					System.err.println("Error parsing data tools, line:  " + input);
 					continue;
 				}
 
 				// Only show sh for Unix/Mac and exe for Windows
 				String os = System.getProperty("os.name").toLowerCase();
-			    if ( os.indexOf("windows") != -1 && ! type.equalsIgnoreCase("exe") )
+			    if ( os.indexOf("windows") != -1 && type.equalsIgnoreCase("sh") )
 			       continue;
-			    else if ( os.indexOf("windows") == -1 && ! type.equalsIgnoreCase("sh") )
+			    else if ( os.indexOf("windows") == -1 && type.equalsIgnoreCase("exe") )
 			       continue;
 				
 			    // Create new menu item
