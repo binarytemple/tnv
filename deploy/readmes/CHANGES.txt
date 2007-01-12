@@ -1,6 +1,8 @@
-0.3.7 - 
+0.3.7 - 01/12/2007
 -External data tools for doing URL queries or running scripts
 -Improved error handling
+-Potential capture dialog fix for linux
+-Universal binary of jpcap library for Mac PPC and Intel
 
 0.3.6 - 01/09/2007
 -Changed license to MIT for more flexibility
