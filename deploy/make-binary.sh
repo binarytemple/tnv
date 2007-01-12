@@ -22,7 +22,9 @@ cd ..
 mkdir -p $MAC_DEST
 cp -r readmes/* $MAC_DEST
 find $MAC_DEST -name CVS -type d -exec rm -rf {} \;
+cd mac_universal_binary
 echo 'Created mac directories'
 echo 'To create disk image, run:'
-echo '  hdiutil create -srcfolder ./tnv-0.3.6 tnv-0.3.6.dmg '
-echo ''
+echo "  hdiutil create -srcfolder ./tnv-$VERSION tnv_mac_$VERSION.dmg "
+echo 'To upload, run:'
+echo "  /sw/bin/ncftpput upload.sourceforge.net /incoming tnv_mac_$VERSION.dmg"
