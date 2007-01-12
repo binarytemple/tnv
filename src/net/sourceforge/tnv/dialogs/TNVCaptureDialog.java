@@ -107,21 +107,18 @@ public class TNVCaptureDialog extends JDialog {
 			try {
 				 String[] devs = PacketCapture.lookupDevices();
 				 for ( int i = 0 ; i < devs.length ; i++ ) {
-					 int lineBreakIndex = devs[i].indexOf('\n'); 
-					 String deviceName = devs[i].substring(0,lineBreakIndex);
-					 String deviceDescription = devs[i].substring(lineBreakIndex+1);
-					 String device = "";
-					 String description = "";
-						 
-					 if ( deviceName != null && deviceName.length() > 0 )
-						 device = deviceName;
-					 else
-						 device = devs[i];
-					 if ( deviceDescription != null && deviceDescription.length() > 0 ) 
-						 description = deviceDescription;
-					 else
-						 description = "";
-					 devices.put(device, description);
+					 String lineSeparator = System.getProperty("line.separator");
+					 int lineBreakIndex = devs[i].indexOf(lineSeparator);
+					 
+					 String deviceName = "", deviceDescription = "";
+					 if ( lineBreakIndex >= 0 ) {
+						 deviceName = devs[i].substring(0,lineBreakIndex);
+						 deviceDescription = devs[i].substring(lineBreakIndex+1);
+					 }
+					 else {
+						 deviceName = devs[i];
+					 }
+					 devices.put(deviceName, deviceDescription);
 				 }
 			}
 			catch (Exception ex) {
