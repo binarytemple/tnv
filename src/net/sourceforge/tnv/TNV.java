@@ -214,6 +214,8 @@ public class TNV extends JFrame {
 		// choose a type of DB connection before showing frame
 		TNVDbTypeChooserDialog.createTNVDbTypeChooserDialog();
 		
+		TNV.setWaitCursor();
+		
 		// create all menus
 		this.createMenus();
 
@@ -225,6 +227,9 @@ public class TNV extends JFrame {
 		int w = (int) ( dim.getWidth() - 50 );
 		int h = (int) ( dim.getHeight() - 50 );
 		this.setBounds( 25, 0, w, h );
+		
+		TNV.setDefaultCursor();
+		
 		this.setVisible( true );
 		
 	}	
