@@ -21,7 +21,6 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Date;
 
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -46,6 +45,7 @@ import net.sourceforge.tnv.dialogs.TNVHomeNetDialog;
 import net.sourceforge.tnv.dialogs.TNVPreferenceDialog;
 import net.sourceforge.tnv.dialogs.TNVQuickStartDialog;
 import net.sourceforge.tnv.dialogs.TNVSplashWindow;
+import net.sourceforge.tnv.dialogs.TNVStopCaptureDialog;
 import net.sourceforge.tnv.dialogs.TNVTimeChooserDialog;
 import net.sourceforge.tnv.ui.TNVDetailWindow;
 import net.sourceforge.tnv.ui.TNVHelpWindow;
@@ -62,8 +62,8 @@ import net.sourceforge.tnv.util.TNVUtil;
  */
 public class TNV extends JFrame {
 
-	private static final String BUILD_DATE = "January 12, 2007";
-	private static final String VERSION = "0.3.7";
+	private static final String BUILD_DATE = "December 11, 2007";
+	private static final String VERSION = "0.3.8";
 	
 	private static final String ABOUT_TEXT = 
 		  "tnv:  http://tnv.sourceforge.net/\n"
@@ -112,9 +112,6 @@ public class TNV extends JFrame {
 
 	// For synchronized capture
 	private Thread captureThread;
-
-	// To determine elapsed time
-	private Date startTime, endTime;
 
 	// Capture variables
 	private int currentSnaplen;
@@ -649,7 +646,6 @@ public class TNV extends JFrame {
 		int returnVal = fileChooser.showDialog( this, "Open Directory" );
 		if ( returnVal != JFileChooser.APPROVE_OPTION )
 			return false;
-		this.startTime = new Date();
 		openDBConnection( fileChooser.getSelectedFile().getPath() + File.separator + DEFAULT_EMBEDDED_DB_FILE );
 		TNVDbUtil.getInstance().setupHosts();
 		setupTNV();
@@ -663,7 +659,6 @@ public class TNV extends JFrame {
 	private boolean openMySqlDB( ) {
 		if (TNVTimeChooserDialog.createTNVTimeChooserDialog() == null)
 			return false;
-		this.startTime = new Date();
 		TNVDbUtil.getInstance().setupHosts();
 		setupTNV();
 		return true;
@@ -747,8 +742,6 @@ public class TNV extends JFrame {
 			return false;
 		String filePath = fileChooser.getSelectedFile().getPath();
 		this.m_pcap = new PacketCapture();
-		// Start the timer
-		this.startTime = new Date();
 		Cursor prevCursor = this.getCursor();
 		this.setCursor( new Cursor( Cursor.WAIT_CURSOR ) );
 		openDBConnection( DEFAULT_EMBEDDED_DB_DIR + File.separator + DEFAULT_EMBEDDED_DB_FILE );
@@ -833,27 +826,13 @@ public class TNV extends JFrame {
 	 * @return success
 	 */
 	private boolean postCaptureSetup( ) {
-		this.endTime = new Date();
-
-		TNVStatusBar.getInstance().updateStatus( TNVStatusBar.Operations.CAPTURE );
+		TNVStatusBar.getInstance().clearStatus();
 		
 		if ( TNVDbUtil.getInstance().getTotalPacketCount() == 0 ) {
-			JOptionPane.showMessageDialog( TNV.this, "No packets captured", "No packets were captured",
+			JOptionPane.showMessageDialog( TNV.this, "No IP packets were captured", "No packets captured",
 					JOptionPane.ERROR_MESSAGE );
 			return false;
 		}
-
-		int receivedCount = 0;
-		receivedCount = this.m_pcap.getStatistics().getReceivedCount();
-		int dropCount = 0;
-		dropCount = this.m_pcap.getStatistics().getDroppedCount();
-		
-		long elapsedTime = ( this.endTime.getTime() - this.startTime.getTime() ) / 1000;
-		JOptionPane.showMessageDialog( TNV.this, 
-				"Packets captured: " + receivedCount
-				+ "\nPackets dropped: " + dropCount
-				+ "\nElapsed Time: " + elapsedTime + " seconds.", 
-				"Capture Summary", JOptionPane.PLAIN_MESSAGE );
 
 		return true;
 	}
@@ -867,7 +846,7 @@ public class TNV extends JFrame {
 		// if thread is already running, then do nothing
 		if ( this.captureThread != null ) return;
 		
-		TNVStatusBar.getInstance().clearStatus();
+		TNVStatusBar.getInstance().updateStatus( TNVStatusBar.Operations.CAPTURE );
 		
 		final int stopNum = stopNumber;
 		this.captureThread = new Thread( new Runnable() {
@@ -961,9 +940,6 @@ public class TNV extends JFrame {
 			return false;
 		}
 
-		// Start the timer
-		this.startTime = new Date();
-
 		// if user specified to stop by number of packets, set that
 		if ( stopNumber != 0 ) {
 			startCaptureThread( stopNumber );
@@ -974,17 +950,19 @@ public class TNV extends JFrame {
 		else {
 			startCaptureThread( INFINITE );
 
-			// Wait until user closes the modal dialog, then stop
-			JOptionPane.showMessageDialog( TNV.this, "Stop capturing packets: ", "Capturing...",
-					JOptionPane.PLAIN_MESSAGE );
-
-			stopCaptureThread();
-			stopPacketCapture();
+			TNVStopCaptureDialog.createTNVStopCaptureDialog(this, this.m_pcap);
 		}
 		return true;
 	}
 
-
+	/**
+	 * For StopCaptureDialog to end capturing
+	 */
+	public void stopCapture() {
+		stopCaptureThread();
+		stopPacketCapture();
+	}
+	
 	/**
 	 * @param args the command line arguments
 	 */
