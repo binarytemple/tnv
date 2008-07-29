@@ -153,12 +153,21 @@ public class TNVCanvas extends PCanvas {
 		// listen for user selection and interaction
 		this.addInputEventListener( new PBasicInputEventHandler() {
 			@Override
+			public void mousePressed( PInputEvent event ) {
+				super.mousePressed(event);
+				
+				// check for right click, trigger popup menu
+				if ( TNVCanvas.this.isPopupTrigger( event, false ) )
+					createPopup( event );
+			}
+
+			@Override
 			public void mouseReleased( PInputEvent event ) {
 				super.mouseReleased( event );
 				PNode pickedNode = event.getPickedNode();
 
 				// check for right click, trigger popup menu
-				if ( TNVCanvas.this.isPopupTrigger( event ) )
+				if ( TNVCanvas.this.isPopupTrigger( event, true ) )
 					createPopup( event );
 
 				// if a host cell is clicked on once, highlight it
@@ -294,10 +303,14 @@ public class TNVCanvas extends PCanvas {
 	// screen. To get around this, all mouse events are handled in the
 	// mouseReleased
 	// method. This should work on all platforms but has not been tested.
-	private boolean isPopupTrigger( PInputEvent event ) {
+	private boolean isPopupTrigger( PInputEvent event, boolean mouseReleased ) {
 
-		if ( System.getProperty( "os.name" ).equalsIgnoreCase( "mac os x" ) )
-			return ( event.isControlDown() || event.isRightMouseButton() );
+		if ( System.getProperty( "os.name" ).equalsIgnoreCase( "mac os x" ) ) {
+			if ( mouseReleased )
+				return ( event.isControlDown() || event.isRightMouseButton() );
+			else
+				return false;
+		}
 		return event.isPopupTrigger();
 	}
 
