@@ -62,15 +62,15 @@ import net.sourceforge.tnv.util.TNVUtil;
  */
 public class TNV extends JFrame {
 
-	private static final String BUILD_DATE = "December 11, 2007";
-	private static final String VERSION = "0.3.8";
+	private static final String BUILD_DATE = "December 29, 2009";
+	private static final String VERSION = "0.3.9";
 	
 	private static final String ABOUT_TEXT = 
 		  "tnv:  http://tnv.sourceforge.net/\n"
 		+ "    Version:  " + VERSION + "\n"
 		+ "    Build date:  " + BUILD_DATE + "\n"
 		+ " \n"
-		+ "(c) 2006-2007, John Goodall. Some rights reserved.\n"
+		+ "(c) 2006-2009, John Goodall. Some rights reserved.\n"
 		+ " \n"
 		+ "Released under the MIT License\n"
 		+ "    http://www.opensource.org/licenses/mit-license.php";

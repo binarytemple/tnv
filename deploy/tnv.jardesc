@@ -1,20 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="MacRoman" standalone="no"?>
 <jardesc>
-<jar path="/Users/jgood/Development/workspace/TNV-SF/deploy/TNV/tnv.jar"/>
-<options buildIfNeeded="true" compress="true" descriptionLocation="/TNV-SF/deploy/tnv.jardesc" exportErrors="false" exportWarnings="true" includeDirectoryEntries="true" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
-<storedRefactorings deprecationInfo="true" structuralOnly="false"/>
-<selectedProjects/>
-<manifest generateManifest="false" manifestLocation="/TNV-SF/deploy/manifest" manifestVersion="1.0" reuseManifest="true" saveManifest="true" usesManifest="true">
-<sealing sealJar="false">
-<packagesToSeal/>
-<packagesToUnSeal/>
-</sealing>
-</manifest>
-<selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
-<file path="/TNV-SF/tnv.properties"/>
-<file path="/TNV-SF/.classpath"/>
-<file path="/TNV-SF/.project"/>
-<file path="/TNV-SF/.cvsignore"/>
-<javaElement handleIdentifier="=TNV-SF/src"/>
-</selectedElements>
+    <jar path="/Users/jgood/Development/workspace-tnv/TNV-SF/deploy/TNV/tnv.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/TNV-SF/deploy/tnv.jardesc" exportErrors="false" exportWarnings="true" includeDirectoryEntries="true" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+    <selectedProjects/>
+    <manifest generateManifest="false" manifestLocation="/TNV-SF/deploy/manifest" manifestVersion="1.0" reuseManifest="true" saveManifest="true" usesManifest="true">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
+        <file path="/TNV-SF/.classpath"/>
+        <file path="/TNV-SF/.cvsignore"/>
+        <file path="/TNV-SF/.project"/>
+        <javaElement handleIdentifier="=TNV-SF/src"/>
+    </selectedElements>
 </jardesc>

@@ -1,3 +1,13 @@
+0.3.9 - 12/29/2009
+-Migrated from HSQLDB to H2
+-Updated MySQL connector lib to version 5.1.10
+-Built a 64 bit version of jpcap library for Mac Intel
+-No longer building Mac OS X application bundles, use startup script
+
+0.3.8 - 12/11/2007
+-Updated HSQLDB to 1.8.0.9
+-Added feedback for packet capture
+
 0.3.7 - 01/12/2007
 -External data tools for doing URL queries or running scripts
 -Improved error handling

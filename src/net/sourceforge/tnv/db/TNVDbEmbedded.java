@@ -28,8 +28,8 @@ import net.sourceforge.tnv.util.TNVUtil;
  */
 public class TNVDbEmbedded extends TNVDbAbstract implements TNVDbInterface {
 
-	private static String JDBC_DRIVER = "org.hsqldb.jdbcDriver";
-	private static String JDBC_CONNECT = "jdbc:hsqldb:file:"; 
+	private static String JDBC_DRIVER = "org.h2.Driver";
+	private static String JDBC_CONNECT = "jdbc:h2:"; 
 	
 	// JDBC prepared statements
 	private PreparedStatement 
@@ -144,7 +144,7 @@ public class TNVDbEmbedded extends TNVDbAbstract implements TNVDbInterface {
 		// Full table of packets ( Index is created automatically for primary keys)
 		TNVDbUtil.update( this.conn, 
 				"CREATE CACHED TABLE " + PACKET_DATA_TABLE + " ( " + 
-				"packet_id INTEGER PRIMARY KEY, " +
+				"packet_id INTEGER IDENTITY PRIMARY KEY, " +
 				"packet OBJECT )" 		// the packet itself
 		);
 
@@ -171,7 +171,7 @@ public class TNVDbEmbedded extends TNVDbAbstract implements TNVDbInterface {
 
 		// Table of hosts
 		TNVDbUtil.update( this.conn, 
-				"CREATE TABLE " + HOST_TABLE + " ( " +
+				"CREATE MEMORY TABLE " + HOST_TABLE + " ( " +
 				"host VARCHAR(16) PRIMARY KEY, " + 	// host address
 				"frequency INTEGER )" // total number of packets
 		);

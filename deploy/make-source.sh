@@ -13,6 +13,3 @@ find $DEST -name CVS -type d -exec rm -rf {} \;
 zip -qr tnv_source_$VERSION.zip $DEST
 rm -rf $DEST
 echo "Created tnv_source_$VERSION.zip"
-
-/sw/bin/ncftpput upload.sourceforge.net /incoming tnv_source_$VERSION.zip
-echo "Uploaded tnv_source_$VERSION.zip to upload.sourceforge.net"

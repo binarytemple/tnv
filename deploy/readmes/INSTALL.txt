@@ -1,7 +1,5 @@
 
-In Mac OS X, double-click the disk image to mount it on your desktop, then copy TNV-xxx.app to your Applications folder. Double-click TNV to start. 
-
-In Linux, uncompress the tar file (tar xzf file) to desired location. Run tnv_startup.sh to start. 
+In Linux or Mac OS X, uncompress the tar file (tar xzf file) to desired location. Run tnv_startup.sh to start. 
 
 In Windows, uncompress the zip file to desired location. Run tnv_startup.bat to start.
 
